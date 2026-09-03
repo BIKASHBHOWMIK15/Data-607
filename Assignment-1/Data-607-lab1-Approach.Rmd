@@ -1,0 +1,34 @@
+---
+title: "DATA 607 - Week 1 Assignment: Approach"
+author: "Bikash Bhowmik"
+date: "03-Sep-2026"
+output: html_document
+---
+## Data Background and Source
+
+For this assignment, I chose the NYC 311 Service Requests dataset. The dataset contains information about non-emergency service requests made by people in New York City. It includes details such as the type of complaint, the agency handling the request, the borough, the status of the request, and the dates and times when requests were created and closed.
+
+The dataset originally comes from NYC Open Data and is available in CSV format. For this assignment, I plan to use a version of the dataset available through Kaggle.
+
+Source: https://www.kaggle.com/search?q=NYC+311+Service+Requests
+
+Dataset :  https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment-1/311-service-requests.csv
+
+
+## Reason for Choosing the Data
+
+I chose this dataset because I wanted to work with real-world data from New York City. Since 311 receives a large number of service requests from residents, the dataset provides a good opportunity to see what types of problems people report and how those requests are handled.
+
+I also think this dataset is a good fit for DATA 607 because it contains different types of data, including categories, dates, times, and missing values. This will give me an opportunity to practice importing, cleaning, and transforming data using R.
+
+Another reason I selected this dataset is that the information could be useful for understanding service demand in different parts of New York City. It may also help identify common types of complaints and patterns in how service requests are handled.
+
+## Data Preparation and Analysis Plan
+
+I will first load the dataset into R and look at its structure to understand the variables and the types of information it contains. I will also check for missing values and any data that may need to be cleaned.
+
+Next, I will select the columns that are most useful for my analysis and rename them if necessary so that they are easier to understand. I will also transform some of the data where needed.
+
+For example, I plan to convert the date and time columns into the appropriate date-time format. I will also review the categorical variables and make sure their values are consistent. If there are missing or unclear values, I will address them where appropriate.
+
+After these steps, I will check the final data frame to make sure the selected columns and values are organized correctly. The goal is to create a clean and easy-to-understand dataset that can be used for further analysis in R.
