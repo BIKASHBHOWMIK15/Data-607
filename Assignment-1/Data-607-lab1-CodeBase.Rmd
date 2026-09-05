@@ -1,0 +1,470 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607 - Assignment 1- Basic Data Loading and Transformation (NYC 311)   </B></h1>
+  <h3><B>Bikash Bhowmik ---- 06 Sep 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 12pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Dataset Source</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Why This Dataset Was Selected</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Planned Approach</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Libraries Used</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Loading the Dataset</a>
+<br>
+<a href="#mySection3" style="font-size: 1em; font-weight: bold;" >Data Standardization</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Work Completed</a>
+<br>
+<a href="#mySection4" style="font-size: 1em; font-weight: bold;" >Data Inspection</a>
+<br>
+<a href="#mySection41" style="font-size: 1em; font-weight: bold;" >Column Selection</a>
+<br>
+<a href="#mySection5" style="font-size: 1em; font-weight: bold;" >Quick Note</a>
+<br>
+<a href="#mySection5_0" style="font-size: 1em; font-weight: bold;" >Top 10 Complaint Types</a>
+<br>
+<a href="#mySection50" style="font-size: 1em; font-weight: bold;" >Feature Engineering: Create an “issue_priority” label</a>
+<br>
+<a href="#mySection51" style="font-size: 1em; font-weight: bold;" >Borough Comparison: Counts and Response Time</a>
+<br>
+<a href="#mySection6" style="font-size: 1em;font-weight: bold; " >Conclusions</a>
+<br>
+
+ </div>
+ 
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Dataset Source
+</B>
+</font>
+
+The dataset used for this assignment is the NYC 311 Service Requests dataset. It contains information about non-emergency service requests made by people in New York City. The dataset includes details such as the type of complaint, the agency responsible for handling it, the borough, the status of the request, and the dates when the request was created and closed.
+
+The data originally comes from NYC Open Data and is available in CSV format.
+
+Source: https://www.kaggle.com/datasets/bilalcagralgan/311-service-requestscsv
+
+Dataset: <a href="https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment-1/311-service-requests.csv" target="_top">
+https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment-1/311-service-requests.csv
+</a>
+
+
+<a id="mySectiona"></a>
+<font size="4">
+<B>
+Why This Dataset Was Selected
+</B>
+</font>
+
+
+I selected this dataset because it contains real-world information about service requests in New York City. It is useful for learning how data is collected, organized, and analyzed.
+
+The dataset also includes different types of data, such as categories, dates, and some missing values. This gives me an opportunity to practice common data cleaning and analysis techniques.
+
+Since the dataset is about New York City, it can also help analyze the types of services people request and how these requests are handled. This makes it a good choice for applying the data science skills learned in this course.
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Planned Approach
+</B>
+</font>
+
+
+I will load the dataset into R, select the columns I need, and clean the data. I will also format the dates and other values to make the data easier to understand and analyze.
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Libraries Used
+</B>
+</font>
+
+library(tidyverse) <br>
+library(janitor)<br>
+library(lubridate)<br>
+
+
+```{r global_options}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+library(lubridate)
+
+```
+
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Loading the Dataset
+</B>
+</font>
+
+```{r}
+nyc_311 <- read.csv(
+  "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment-1/311-service-requests.csv",
+  stringsAsFactors = FALSE,
+  na.strings = c("", "NA", "N/A")
+)
+
+
+
+head(nyc_311)
+
+```
+
+
+<a id="mySection3"></a>
+<font size="4">
+<B>
+Data Standardization
+</B>
+</font>
+
+```{r}
+colnames(nyc_311) <- janitor::make_clean_names(colnames(nyc_311))
+
+# Verify cleaned names
+colnames(nyc_311)
+
+```
+
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Work Completed
+</B>
+</font>
+
+
+The dataset is loaded directly from a public GitHub repository to ensure reproducibility. After loading the data into R, an initial preview is performed to validate that the data was read correctly and to inspect the available variables. Instead of fighting spaces/case, I standardized column names once, then selection becomes trivial and clean.
+
+<a id="mySection4"></a>
+<font size="4">
+<B>
+Data Inspection
+</B>
+</font>
+
+
+Before performing transformations, the dataset structure and available variables are inspected to understand data types and naming conventions.
+
+```{r}
+str(nyc_311)
+
+# Total rows loaded
+nrow(nyc_311)
+```
+
+<a id="mySection41"></a>
+<font size="4">
+<B>
+Column Selection
+</B>
+</font>
+
+
+I selected the main columns, such as complaint type, agency, location, status, and dates. I removed rows with missing values in the selected fields to make the data easier to analyze. However, I kept missing Closed Date values because some service requests are still open.
+
+```{r}
+# Select a subset of relevant columns
+nyc_311_subset <- nyc_311 %>%
+  select(
+    complaint_type,
+    descriptor,
+    borough,
+    agency,
+    status,
+    created_date,
+    closed_date
+  )
+nyc_311_subset <- nyc_311_subset %>%
+  filter(!is.na(created_date))
+
+head(nyc_311_subset)
+```
+
+```{r}
+nyc_311_clean <- nyc_311_subset
+
+# Convert date columns to datetime format
+nyc_311_clean <- nyc_311_clean %>%
+  mutate(
+    created_date = parse_date_time(created_date, orders = c("mdy HMS p", "mdy HMS", "ymd HMS", "ymd HMSz")),
+    closed_date  = parse_date_time(closed_date,  orders = c("mdy HMS p", "mdy HMS", "ymd HMS", "ymd HMSz"))
+  )
+
+# Rows after filtering missing created_date
+nrow(nyc_311_subset)
+```
+
+
+```{r}
+str(nyc_311_clean)
+
+
+nyc_311_clean <- nyc_311_clean %>%
+  mutate(
+    response_time_hours = case_when(
+      is.na(closed_date) ~ NA_real_,
+      TRUE ~ as.numeric(difftime(closed_date, created_date, units = "hours"))
+    ),
+    response_time_hours = ifelse(response_time_hours < 0, NA_real_, response_time_hours),
+    response_time_hours = ifelse(response_time_hours > 24*365, NA_real_, response_time_hours)  # optional cap: > 1 year
+  )
+```
+
+<a id="mySection5"></a>
+<font size="4">
+<B>
+Quick Note
+</B>
+</font>
+
+
+
+
+During validation, some records produced negative response times because the closed timestamp occurred earlier than the created timestamp. This indicates inconsistent or erroneous timestamps in the source data. These negative values were treated as invalid and set to missing (NA) to avoid misleading results.
+
+```{r}
+summary(nyc_311_clean$response_time_hours)
+```
+
+```{r}
+glimpse(nyc_311_clean)
+
+
+summary(nyc_311_clean)
+
+```
+
+
+<a id="mySection5_0"></a>
+<font size="4">
+<B>
+Top 10 Complaint Types
+</B>
+</font>
+
+
+```{r}
+complaint_summary <- nyc_311_clean %>%
+  count(complaint_type, sort = TRUE) %>%
+  mutate(
+    pct_label = scales::percent(n / sum(n), accuracy = 0.1)
+  ) %>%
+  slice_head(n = 10)
+
+complaint_summary
+```
+
+```{r}
+ggplot(complaint_summary, aes(x = reorder(complaint_type, n), y = n)) +
+  geom_col(fill = "skyblue") +
+  coord_flip() +
+  geom_text(aes(label = pct_label), hjust = -0.1) +
+  labs(
+    title = "Top 10 NYC 311 Complaint Types",
+    x = "Complaint Type",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+
+The Top 10 complaint categories provide a high-level view of what issues residents most frequently report through NYC 311. A small number of complaint types account for a large share of total requests, suggesting that many service demands are driven by recurring quality-of-life issues. This type of frequency analysis helps prioritize which categories are most important for deeper operational or policy-focused investigation.
+
+<a id="mySection50"></a>
+<font size="4">
+<B>
+Feature Engineering: Create an “issue_priority” label
+</B>
+</font>
+
+
+
+```{r}
+nyc_311_clean <- nyc_311_clean %>%
+  mutate(
+    issue_priority = case_when(
+      str_detect(tolower(complaint_type), "heat|hot water|electric|gas") ~ "High",
+      str_detect(tolower(complaint_type), "noise") ~ "Medium",
+      TRUE ~ "Low/Other"
+    )
+  )
+
+nyc_311_clean %>%
+  count(issue_priority, sort = TRUE)
+```
+
+```{r}
+nyc_311_clean %>%
+  count(issue_priority) %>%
+  ggplot(aes(x = issue_priority, y = n)) +
+  geom_col(fill = "skyblue") +
+  labs(
+    title = "Engineered Feature: Complaint Priority (Simple Rule-Based)",
+    x = "Priority",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+
+To demonstrate feature engineering, I created a simplified “issue_priority” variable by grouping complaints into High, Medium, and Low/Other categories using rule-based matching on complaint keywords (e.g., heat/hot water and utility-related issues). This engineered feature makes the dataset more interpretable for downstream analysis by reducing many complaint categories into broader urgency levels. While the classification rules are simple, they mirror real-world preprocessing where domain knowledge is used to create decision-support variables.
+
+<a id="mySection51"></a>
+<font size="4">
+<B>
+Borough Comparison: Counts and Response Time
+</B>
+</font>
+
+
+
+```{r}
+borough_summary <- nyc_311_clean %>%
+  group_by(borough) %>%
+  summarise(
+    total_requests = n(),
+    closed_requests = sum(!is.na(response_time_hours)),
+    median_response_hours = median(response_time_hours, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_requests))
+
+borough_summary
+```
+
+```{r}
+
+ggplot(borough_summary, aes(x = reorder(borough, total_requests), y = total_requests)) +
+  geom_col(fill = "skyblue") +
+  coord_flip() +
+  labs(
+    title = "Total NYC 311 Requests by Borough",
+    x = "Borough",
+    y = "Total Requests"
+  ) +
+  theme_minimal()
+```
+
+
+
+Comparing total service requests across boroughs highlights differences in reported service demand by location. Borough-level request volume can be influenced by multiple factors such as population size, housing density, local infrastructure, and reporting behavior. This comparison provides useful context for future work, such as normalizing requests by population or exploring borough-specific complaint patterns.
+
+<a id="mySection6"></a>
+<font size="4">
+<B>
+Conclusions
+</B>
+</font>
+
+
+
+This assignment showed how to load and clean a real-world NYC 311 dataset using R and Quarto. I selected useful variables, handled missing values, and converted dates into a usable format.
+
+I also explored the most common complaint types, grouped complaints by priority, and compared service requests across NYC boroughs.
+
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
