@@ -1,0 +1,54 @@
+---
+title: "DATA 607 - Week 2B Assignment: Approach"
+author: "Bikash Bhowmik"
+date: "10-Sep-2026"
+output: html_document
+---
+## Objective
+
+The goal of this project is to evaluate a binary classification model using the provided penguin prediction dataset. I will examine how different probability thresholds affect the model's performance using classification metrics.
+
+
+## Data
+
+I will use the provided penguin_predictions.csv dataset. The dataset contains the predicted probability of an observation being female, the predicted class, and the actual sex label. I will first examine the class distribution and calculate the null error rate as a baseline.
+
+## Classification Analysis
+
+I will convert the actual sex labels into a binary format and use the predicted probability of being female to create predictions. I will evaluate three probability thresholds:
+
+• 0.2<br>
+• 0.5<br>
+• 0.8<br>
+
+For each threshold, I will create a confusion matrix containing true positives, false positives, true negatives, and false negatives.
+
+
+## Performance Metrics
+
+I will calculate the following metrics for each threshold:
+<b>
+
+• Accuracy <br>
+• Precision<br>
+• Recall<br>
+• F1 score<br>
+</b>
+
+I will compare these metrics to understand how changing the threshold affects classification performance.
+
+
+## Threshold Analysis
+
+I will examine the tradeoff between precision and recall at different thresholds. I will also provide simple real-world examples to explain when a lower threshold may be preferred for identifying more positive cases and when a higher threshold may be preferred for making more confident positive predictions.
+
+
+## Reproducibility
+
+All R and .RMD code will be included in my GitHub repository. The analysis will include the data loading, class distribution, null error rate, confusion matrices, classification metrics, and threshold comparisons.
+
+
+
+
+
+
