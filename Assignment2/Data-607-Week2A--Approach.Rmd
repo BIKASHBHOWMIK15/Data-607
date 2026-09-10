@@ -1,0 +1,53 @@
+---
+title: "DATA 607 - Week 2A Assignment: Approach"
+author: "Bikash Bhowmik"
+date: "10-Sep-2026"
+output: html_document
+---
+## Objective
+
+The goal of this project is to collect a small movie-rating dataset, store it in PostgreSQL, and analyze it using R. This will demonstrate the process of collecting, storing, querying, and analyzing data.
+
+
+## Data Collection
+
+I will select <b> six recent popular movies </b> and ask at least <b> five people </b> to rate the movies they have watched. Ratings will use a <b> 1–5 scale </b>. If someone has not watched a particular movie, I will leave the rating as missing rather than asking them to guess.
+
+## Database Design
+
+I will use <b> PostgreSQL </b> and pgAdmin 4 to create and manage the database. I plan to use three tables:
+
+•	<b> users </b> – participant information <br>
+•	<b>movies </b>– movie titles and release years <br>
+•	<b>ratings </b>– ratings connecting users and movies<br>
+
+Primary keys and foreign keys will be used to maintain relationships between the tables. Ratings will also be limited to values from 1 to 5, with a unique constraint to prevent duplicate ratings for the same user and movie.
+
+
+## Missing Data
+
+Movies that participants have not seen will be represented as NULL in SQL and as NA in R. When calculating averages, I will exclude missing values using appropriate R functions. I will also report the number of available ratings for each movie.
+
+
+## R Analysis
+
+I will connect PostgreSQL to R using DBI and RPostgres. After importing the SQL data into R, I will calculate:
+
+•	Average rating for each movie<br>
+•	Number of ratings per movie<br>
+•	Average rating by participant<br>
+•	Rating distribution<br>
+•	Missing-rating counts<br>
+
+I may also create a user-by-movie table to demonstrate the basic structure of a user-item dataset.
+
+
+## Reproducibility
+
+All SQL, R, and Quarto code will be included in my GitHub repository. The SQL scripts will include the commands needed to create and populate the tables. Database passwords will not be included in the code.
+
+
+
+
+
+
