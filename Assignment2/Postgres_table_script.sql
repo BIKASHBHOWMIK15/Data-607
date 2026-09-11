@@ -64,5 +64,3 @@ JOIN movies m ON r.movie_id = m.movie_id
 ORDER BY u.name, m.title;
 
 
-
-SELECT datname FROM pg_database;
