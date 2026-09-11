@@ -1,0 +1,411 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607 - Assignment 2- Week 2A SQL and R: Code Base submission   </B></h1>
+  <h3><B>Bikash Bhowmik ---- 12 Sep 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 12pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Objective</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Data Collection</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Tools / Environment</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Database Design</a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Keys and Constraints (Planned)</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Missing Data Strategy (Planned)</a>
+<br>
+<a href="#mySection3" style="font-size: 1em; font-weight: bold;" >Analysis Plan in R</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Reproducibility Plan</a>
+<br>
+<a href="#mySection4" style="font-size: 1em; font-weight: bold;" >Loading Libraries</a>
+<br>
+<a href="#mySection41" style="font-size: 1em; font-weight: bold;" >Connect to PosgreSQL</a>
+<br>
+<a href="#mySection5" style="font-size: 1em; font-weight: bold;" >Load table in R</a>
+<br>
+<a href="#mySection5_0" style="font-size: 1em; font-weight: bold;" >Join tables in R</a>
+<br>
+<a href="#mySection50" style="font-size: 1em; font-weight: bold;" >Demonstrate missing ratings handling (Part 1)</a>
+<br>
+<a href="#mySection500" style="font-size: 1em; font-weight: bold;" >Demonstrate missing ratings handling (Part 2)</a>
+<br>
+<a href="#mySection51" style="font-size: 1em; font-weight: bold;" >Simple summaries</a>
+<br>
+<a href="#mySection6" style="font-size: 1em;font-weight: bold; " >Disconnecting Database</a>
+<br>
+<a href="#mySection61" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Objective
+</B>
+</font>
+
+The goal of this assignment is to collect a small dataset of movie ratings from different users, store the data in a PostgreSQL database, and analyze it using R. This project demonstrates the complete process of collecting data, storing it in a relational database, querying the data, and bringing it into R for analysis. It also shows how missing movie ratings can be handled appropriately.
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Data Collection Plan
+</B>
+</font>
+
+
+-   **Items (Movies):** I will select **six recent popular movies** (or similar media items) to increase the chance that participants have seen at least some of them.
+-   **Users (Participants):** I will survey **at least five people**.
+-   **Rating Scale:** Participants will rate any movie they have seen on a **1–5 integer scale**.
+-   **Missing Ratings:** If a participant has not seen a movie, the rating will be recorded as **missing (NULL)** instead of forcing a guess.
+
+Responses will be collected in a simple format (e.g., a small table) and then inserted into PostgreSQL.
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Tools / Environment
+</B>
+</font>
+
+
+-   **Database:** PostgreSQL (local installation)\
+-   **GUI:** pgAdmin 4 (for running SQL scripts and verifying tables)\
+-   **R Packages (planned):** `DBI`, `RPostgres`, `tidyverse`
+
+> **Security Note:** Database passwords will **not** be included in the code. Connection credentials will be stored using environment variables or masked placeholders.
+
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Database Design (Normalized Schema)
+</B>
+</font>
+
+To keep the solution professional and interview-ready, I will use a **normalized relational schema** to represent the many-to-many relationship between users and movies.
+
+Planned tables:
+
+-   `users(user_id, name)`
+-   `movies(movie_id, title, release_year)`
+-   `ratings(rating_id, user_id, movie_id, rating)`
+`
+
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Keys and Constraints (Planned)
+</B>
+</font>
+
+
+-   `users.user_id` and `movies.movie_id` will be **primary keys**
+-   `ratings.user_id` and `ratings.movie_id` will be **foreign keys**
+-   Ratings will be constrained to the range **1–5**
+-   A **unique constraint** on `(user_id, movie_id)` will prevent duplicate ratings
+
+This structure mirrors how real recommendation datasets are stored: users and movies are separate entities, and ratings are stored in a junction table.
+
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Missing Data Strategy
+</B>
+</font>
+
+
+Missing ratings are expected because participants may not have seen every movie.
+
+I will handle missing data in two ways:
+
+1.  **In SQL:** Missing ratings will be represented as `NULL` (or omitted rows if a participant did not rate an item).
+2.  **In R:** When analyzing results, missing ratings will appear as `NA`. Summary statistics (means, medians) will be computed with `na.rm = TRUE` to avoid bias from missingness.
+
+To document missingness, I will report:
+
+-   ratings count per movie (coverage)
+-   ratings count per user
+-   how many missing ratings exist overall
+
+<a id="mySection3"></a>
+<font size="4">
+<B>
+Analysis Plan in R
+</B>
+</font>
+
+After the database is populated, I will connect PostgreSQL to R using DBI and RPostgres. I will then use R to:
+
+-Combine the users, movies, and ratings tables into one tidy dataset.<br>
+-Calculate basic summaries, including:<br>
+      -The average rating for each movie along with the number of ratings.<br>
+      -The average rating given by each user.<br>
+      -The overall distribution of ratings from 1 to 5.<br>
+-Optionally, convert the data into a user–item matrix in wide format to show how the dataset can be structured for collaborative filtering and recommendation systems. An advanced recommendation model is not required for this assignment.
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Reproducibility Plan
+</B>
+</font>
+
+
+Even if I use pgAdmin to run queries, I will include the full SQL scripts required to:
+
+-   create the tables (`CREATE TABLE`)
+-   populate them (`INSERT INTO`)
+-   query them (`SELECT ... JOIN ...`)
+
+All code (SQL + R + Quarto) will be stored in a GitHub repository for submission, with sensitive credentials removed or masked.
+
+<a id="mySection4"></a>
+<font size="4">
+<B>
+Loading Libraries
+</B>
+</font>
+
+library(DBI) <br>
+library(RPostgres)<br>
+library(dplyr)<br>
+library(tidyr)<br>
+
+
+```{r global_options}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
+library(DBI)
+library(RPostgres)
+library(dplyr)
+library(tidyr)
+
+```
+
+
+<a id="mySection41"></a>
+<font size="4">
+<B>
+Connect to PosgreSQL
+</B>
+</font>
+
+```{r}
+con <- dbConnect(
+  RPostgres::Postgres(),
+  host = "localhost",
+  port = 5432,
+  dbname = "postgres",
+  user = "postgres",
+  password = "admin"
+)
+
+dbListTables(con) 
+
+```
+
+<a id="mySection50"></a>
+<font size="4">
+<B>
+Load table in R
+</B>
+</font>
+```{r}
+users_df  <- dbGetQuery(con, "SELECT * FROM users;")
+movies_df <- dbGetQuery(con, "SELECT * FROM movies;")
+ratings_df <- dbGetQuery(con, "SELECT * FROM ratings;")
+
+```
+
+<a id="mySection5_0"></a>
+<font size="4">
+<B>
+Join tables in R
+</B>
+</font>
+
+
+```{r}
+ratings_joined <- ratings_df %>%
+  left_join(users_df, by = "user_id") %>%
+  left_join(movies_df, by = "movie_id") %>%
+  select(name, title, release_year, rating) %>%
+  arrange(name, title)
+
+ratings_joined
+```
+
+
+<a id="mySection50"></a>
+<font size="4">
+<B>
+Demonstrate missing ratings handling (Part 1)
+</B>
+</font>
+
+
+```{r}
+ratings_complete <- users_df %>%
+  crossing(movies_df) %>%
+  left_join(ratings_df, by = c("user_id", "movie_id"))
+
+ratings_complete
+
+
+```
+
+<a id="mySection500"></a>
+<font size="4">
+<B>
+Demonstrate missing ratings handling (Part 2)
+</B>
+</font>
+
+```{r}
+
+ratings_complete %>%
+  summarise(
+    total_possible = n(),
+    missing_ratings = sum(is.na(rating)),
+    observed_ratings = sum(!is.na(rating))
+  )
+
+
+```
+
+
+<a id="mySection51"></a>
+<font size="4">
+<B>
+Simple summaries
+</B>
+</font> 
+
+```{r}
+ratings_complete %>%
+  group_by(title) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE),
+            n_ratings = sum(!is.na(rating)))
+```
+
+
+
+<a id="mySection6"></a>
+<font size="4">
+<B>
+Disconnecting Database
+</B>
+</font>
+
+```{r}
+dbDisconnect(con)
+```
+
+
+<a id="mySection61"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>
+
+This assignment demonstrates how relational databases and R can be used together in a data science workflow. PostgreSQL provides structured data storage and helps maintain data integrity through constraints, while R is used for data manipulation, handling missing values, and performing analysis. The final dataset is organized in a user–item ratings format, which is commonly used in recommendation systems.
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
