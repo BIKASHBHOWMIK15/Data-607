@@ -1,0 +1,12 @@
+
+
+Conversation with ChatGPT (Handling missing ratings)
+
+How do I demonstrate a missing-ratings strategy?
+
+Assistant (ChatGPT): Create a full user–movie grid and then left-join ratings so that missing
+ratings appear as NA. This explicitly represents unseen items.
+Suggested code:
+ratings_complete <- users_df %>%
+crossing(movies_df) %>%
+left_join(ratings_df, by = c("user_id", "movie_id"))
