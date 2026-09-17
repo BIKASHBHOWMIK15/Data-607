@@ -1,0 +1,73 @@
+---
+title: "DATA 607 - Assignment 3B: Window Functions"
+author: "Bikash Bhowmik"
+date: "17-Sep-2026"
+output: html_document
+---
+## Objective
+
+The goal of this assignment is to use SQL window functions to analyze time-series data for multiple items. The analysis will calculate year-to-date (YTD) averages and six-day moving averages to examine trends and changes over time.
+
+
+## Data Description
+
+I will use daily stock price data for multiple companies, such as **AAPL** and **MSFT**, beginning on January 1, 2022. The data will be initially retrieved in R using the **`tidyquant`** package, which provides access to historical stock market data from Yahoo Finance.
+
+The dataset will contain daily observations for each company, allowing the analysis to compare stock price trends over time. To make the analysis reproducible, I will save the retrieved data as a CSV file and include the file in the GitHub repository. The analysis will then use the saved CSV file instead of retrieving the data again from Yahoo Finance.
+
+The dataset will include the following main variables:
+
+* **symbol** – the stock ticker symbol identifying the company
+* **date** – the date of the stock price observation
+* **close** – the closing price of the stock for that day
+
+Using this time-series data, I will apply SQL window functions to calculate year-to-date averages and six-day moving averages for each company.
+
+Sample data:
+
+symbol | date       | close
+------ | ---------- | --------
+AAPL   | 2022-01-03 | 182.00999
+AAPL   | 2022-01-04 | 179.69999
+AAPL   | 2022-01-05 | 174.91999
+MSFT   | 2026-01-22 | 451.14001
+MSFT   | 2026-01-23 | 465.95001
+MSFT   | 2026-01-26 | 470.27999
+
+## Analysis Approach
+
+The analysis will follow a series of steps to prepare the stock price data and calculate the required time-series measures.
+
+1. **Retrieve the data**
+   Obtain daily stock price data for at least two companies, such as AAPL and MSFT, beginning on January 1, 2022. The data will initially be retrieved using the `tidyquant` package in R.
+
+2. **Save the data for reproducibility**
+   Save the retrieved stock price data as a CSV file and include it in the GitHub repository. This will ensure that the analysis can be reproduced using the same dataset without depending on future changes to the online data source.
+
+3. **Load and prepare the data**
+   Import the saved CSV file into R and check the data types, dates, missing values, and stock symbols. The data will be organized in chronological order for each company.
+
+4. **Apply window functions**
+   Use `dplyr` window functions to perform calculations separately for each stock symbol. The observations will be ordered by date so that the calculations follow the correct time sequence.
+
+5. **Calculate the YTD average**
+   Calculate a cumulative **year-to-date (YTD) average closing price** for each company. The calculation will restart at the beginning of each calendar year and will use all available closing prices from the beginning of that year up to each date.
+
+6. **Calculate the six-day moving average**
+   Calculate a **six-day moving average** of the closing price for each company. This will use the current day's closing price along with the previous five trading day observations to provide a smoother view of short term price trends.
+
+7. **Check and visualize the results**
+   Review the calculated values using summary statistics and sample rows from the dataset. Simple visualizations may also be created to compare the actual closing prices with the YTD and six day moving averages for each stock.
+
+8. **Document the analysis**
+   Clearly document the R code, calculations, and results in the final report and GitHub repository so that another person can follow the same steps and reproduce the analysis.
+
+
+
+## Challenges and Considerations
+
+Stock market data does not include weekends and market holidays, so the six day moving average will be calculated using the six most recent available trading days rather than six consecutive calendar days. This approach will make the moving average more appropriate for stock price data.
+
+Another consideration is making sure that the year to date calculation resets correctly at the beginning of each calendar year. The data will also need to be sorted by stock symbol and date to ensure that the window calculations are performed in the correct order.
+
+Finally, I will check for missing values or duplicate records before performing the calculations, since these could affect the accuracy of the results.
