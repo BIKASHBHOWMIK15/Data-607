@@ -1,0 +1,76 @@
+---
+title: "DATA 607 - Assignment 3A: Global Baseline Estimate"
+author: "Bikash Bhowmik"
+date: "17-Sep-2026"
+output: html_document
+---
+## Objective
+
+The goal of this assignment is to build a non-personalized movie recommendation system in R using the Global Baseline Estimate method. The system will use the movie ratings dataset created in the previous assignment and stored in PostgreSQL. The purpose is to use the existing ratings data to calculate baseline ratings for movies and generate recommendations without making recommendations based on individual user preferences.
+
+
+## Data Description
+
+The dataset contains movie ratings collected from a small survey. The data is organized into three related tables in PostgreSQL:
+
+• 	<b> users </b> – contains the user ID and user name.<br>
+•	<b>movies </b>– contains the movie ID, movie title, and release year.<br>
+• <b>ratings </b>– contains the rating ID, user ID, movie ID, and rating given by the user.<br>
+
+Participants rated the movies on a scale from 1 to 5. If a user has not watched a particular movie, there is no rating for that movie. The PostgreSQL database was used to store and manage the data.
+
+For reproducibility, the GitHub repository will include the SQL scripts needed to create the tables and insert the survey data into the PostgreSQL database.
+
+## Database Design
+
+<b> I have created below tables in Assignment 2A </b>
+
+•	<b> users </b> – participant information <br>
+•	<b>movies </b>– movie titles and release years <br>
+•	<b>ratings </b>– ratings connecting users and movies<br>
+
+Primary keys and foreign keys will be used to maintain relationships between the tables. Ratings will also be limited to values from 1 to 5, with a unique constraint to prevent duplicate ratings for the same user and movie.
+
+
+## Methodology
+
+he recommendation system will use the Global Baseline Estimate method to predict movie ratings. I will follow the calculation steps provided in the spreadsheet and apply any regularization parameters included in the instructions.
+
+The implementation will follow these steps:
+
+1. Load the movie ratings data from PostgreSQL into R.
+2. Calculate the global average rating (μ) across all ratings.
+3. Calculate the user bias, which measures how much each user's average rating differs from the global average.
+4. Calculate the movie bias, which measures how much each movie's average rating differs from the global average after accounting for user bias.
+5. Use the global average, user bias, and movie bias to calculate the predicted rating for each user-movie combination.
+6. Compare the predicted ratings with the actual ratings to evaluate how well the model performs.
+
+The basic prediction formula is:
+
+Predicted Rating = Global Average + User Bias + Movie Bias
+
+This approach provides a non-personalized baseline recommendation model that can be used to estimate ratings for movies that a user has not yet rated.
+
+
+## Recommendation Process
+
+The recommendation system will generate predicted ratings for movies that a selected user has not yet rated. These predictions will be based on the Global Baseline Estimate model, using the global average rating along with the user and movie biases.
+
+After calculating the predicted ratings, the system will rank the unrated movies from highest to lowest predicted rating. The movies with the highest predicted ratings will then be selected as the recommendations for the user.
+
+
+## Possible Challenges
+
+There are several challenges that may come up while developing the movie recommendation system. Since the ratings are collected from a small survey, the dataset may have a relatively small number of users and ratings. This could make it more difficult for the model to identify reliable patterns in user and movie preferences.
+
+Another challenge is sparse ratings. Users may have rated only some of the available movies, leaving many user and movie combinations without ratings. The system will need to handle these missing ratings carefully when generating predictions for movies that a user has not seen or rated.
+
+A third challenge is making sure that the data can be loaded consistently from PostgreSQL into R. The database connection, table structure, data types, and joins between the users, movies, and ratings tables must be handled correctly. Any problems during the data loading or data cleaning process could affect the model results.
+
+Finally, I will need to make sure the analysis is reproducible. The SQL scripts, R code, database structure, and calculation steps should be clearly documented so that the same results can be obtained when the project is run again.
+
+
+
+
+
+
