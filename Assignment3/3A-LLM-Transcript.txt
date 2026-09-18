@@ -1,0 +1,17 @@
+LLM Transcript and Citation
+Tool Used: ChatGPT (OpenAI)
+Purpose: Implementing a Global Baseline Estimate recommender system in R using movie
+ratings stored in PostgreSQL
+Course: DATA 607 – Assignment 3A (Global Baseline Estimate)
+
+
+How can I generate recommendations for movies users have not rated?
+Assistant (ChatGPT): Create all user–movie combinations, remove already-rated movies,
+compute predicted ratings, and select the top-N movies per user.
+Suggested code:
+recommendations_all <- all_scored %>%
+filter(is.na(rating)) %>%
+group_by(user_id, name) %>%
+arrange(desc(predicted_rating), .by_group = TRUE) %>%
+slice_head(n = 5)
+
