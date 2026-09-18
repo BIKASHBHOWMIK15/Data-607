@@ -1,0 +1,659 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607 - Assignment 3A: Global Baseline Estimate   </B></h1>
+  <h3><B>Bikash Bhowmik ---- 19 Sep 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 12pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Objective</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Data Description</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Database Design</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Methodology</a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Recommendation Process</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Possible Challenges</a>
+<br>
+<a href="#mySection3" style="font-size: 1em; font-weight: bold;" >Loading Libraries</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Connect to PosgreSQL</a>
+<br>
+<a href="#mySection4" style="font-size: 1em; font-weight: bold;" >Load table in R</a>
+<br>
+<a href="#mySection400" style="font-size: 1em; font-weight: bold;" >Prepare a clean ratings dataset</a>
+<br>
+<a href="#mySection5" style="font-size: 1em; font-weight: bold;" >Join in names/titles for readability</a>
+<br>
+<a href="#mySection5_0" style="font-size: 1em; font-weight: bold;" >Global Baseline Estimate</a>
+<br>
+<a href="#mySection5_1" style="font-size: 1em; font-weight: bold;" >Quick metric: RMSE on observed ratings</a>
+<br>
+<a href="#mySection6" style="font-size: 1em;font-weight: bold; " >Recommendations for all users</a>
+<br>
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Extension for some visualization for better analysis</a>
+<br>
+<a href="#mySection87" style="font-size: 1em;font-weight: bold; " >[1] Movie bias visualization</a>
+<br>
+<a href="#mySection88" style="font-size: 1em;font-weight: bold; " >[2] User bias visualization</a>
+<br>
+<a href="#mySection89" style="font-size: 1em;font-weight: bold; " >[3] Actual vs predicted ratings</a>
+<br>
+<a href="#mySection90" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Objective
+</B>
+</font>
+
+The goal of this assignment is to build a non-personalized movie recommendation system in R using the Global Baseline Estimate method. The system will use the movie ratings dataset created in the previous assignment and stored in PostgreSQL. The purpose is to use the existing ratings data to calculate baseline ratings for movies and generate recommendations without making recommendations based on individual user preferences.
+
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Data Description
+</B>
+</font>
+
+The dataset contains movie ratings collected from a small survey. The data is organized into three related tables in PostgreSQL:
+
+• 	<b> users </b> – contains the user ID and user name.<br>
+•	<b>movies </b>– contains the movie ID, movie title, and release year.<br>
+• <b>ratings </b>– contains the rating ID, user ID, movie ID, and rating given by the user.<br>
+
+Participants rated the movies on a scale from 1 to 5. If a user has not watched a particular movie, there is no rating for that movie. The PostgreSQL database was used to store and manage the data.
+
+For reproducibility, the GitHub repository will include the SQL scripts needed to create the tables and insert the survey data into the PostgreSQL database.
+
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Database Design
+</B>
+</font>
+
+<b> I have created below tables in Assignment 2A </b>
+
+•	<b> users </b> – participant information <br>
+•	<b>movies </b>– movie titles and release years <br>
+•	<b>ratings </b>– ratings connecting users and movies<br>
+
+Primary keys and foreign keys will be used to maintain relationships between the tables. Ratings will also be limited to values from 1 to 5, with a unique constraint to prevent duplicate ratings for the same user and movie.
+
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Methodology
+</B>
+</font>
+
+e recommendation system will use the Global Baseline Estimate method to predict movie ratings. I will follow the calculation steps provided in the spreadsheet and apply any regularization parameters included in the instructions.
+
+The implementation will follow these steps:
+
+1. Load the movie ratings data from PostgreSQL into R.
+2. Calculate the global average rating (μ) across all ratings.
+3. Calculate the user bias, which measures how much each user's average rating differs from the global average.
+4. Calculate the movie bias, which measures how much each movie's average rating differs from the global average after accounting for user bias.
+5. Use the global average, user bias, and movie bias to calculate the predicted rating for each user-movie combination.
+6. Compare the predicted ratings with the actual ratings to evaluate how well the model performs.
+
+The basic prediction formula is:
+
+Predicted Rating = Global Average + User Bias + Movie Bias
+
+This approach provides a non-personalized baseline recommendation model that can be used to estimate ratings for movies that a user has not yet rated.
+
+`
+
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Recommendation Process
+</B>
+</font>
+
+The recommendation system will generate predicted ratings for movies that a selected user has not yet rated. These predictions will be based on the Global Baseline Estimate model, using the global average rating along with the user and movie biases.
+
+After calculating the predicted ratings, the system will rank the unrated movies from highest to lowest predicted rating. The movies with the highest predicted ratings will then be selected as the recommendations for the user.
+
+
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Possible Challenges
+</B>
+</font>
+
+
+There are several challenges that may come up while developing the movie recommendation system. Since the ratings are collected from a small survey, the dataset may have a relatively small number of users and ratings. This could make it more difficult for the model to identify reliable patterns in user and movie preferences.
+
+Another challenge is sparse ratings. Users may have rated only some of the available movies, leaving many user and movie combinations without ratings. The system will need to handle these missing ratings carefully when generating predictions for movies that a user has not seen or rated.
+
+A third challenge is making sure that the data can be loaded consistently from PostgreSQL into R. The database connection, table structure, data types, and joins between the users, movies, and ratings tables must be handled correctly. Any problems during the data loading or data cleaning process could affect the model results.
+
+Finally, I will need to make sure the analysis is reproducible. The SQL scripts, R code, database structure, and calculation steps should be clearly documented so that the same results can be obtained when the project is run again.
+
+
+
+
+<a id="mySection3"></a>
+<font size="4">
+<B>
+Loading Libraries
+</B>
+</font>
+
+library(DBI) <br>
+library(RPostgres)<br>
+library(dplyr)<br>
+library(tidyr)<br>
+library(tidyverse)<br>
+library(ggplot2)<br>
+
+
+```{r global_options}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
+library(DBI)
+library(RPostgres)
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(ggplot2)
+
+```
+
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Connect to PosgreSQL
+</B>
+</font>
+
+```{r}
+con <- dbConnect(
+  RPostgres::Postgres(),
+  host = "localhost",
+  port = 5432,
+  dbname = "postgres",
+  user = "postgres",
+  password = "admin"
+)
+
+dbListTables(con) 
+
+```
+
+<a id="mySection4"></a>
+<font size="4">
+<B>
+Load table in R
+</B>
+</font>
+
+
+```{r}
+users_df  <- dbGetQuery(con, "SELECT * FROM users;")
+movies_df <- dbGetQuery(con, "SELECT * FROM movies;")
+ratings_df <- dbGetQuery(con, "SELECT * FROM ratings;")
+
+```
+
+
+<b><u> Basic sanity checks </b></u>
+
+
+```{r}
+glimpse(users_df)
+glimpse(movies_df)
+glimpse(ratings_df)
+
+```
+
+<a id="mySection400"></a>
+<font size="4">
+<B>
+Prepare a clean ratings dataset
+</B>
+</font>
+
+```{r}
+ratings_clean <- ratings_df %>%
+  select(user_id, movie_id, rating) %>%
+  mutate(rating = as.numeric(rating)) %>%
+  filter(!is.na(rating))
+```
+
+  
+
+<a id="mySection5"></a>
+<font size="4">
+<B>
+Join in names/titles for readability
+</B>
+</font>
+
+
+```{r}
+ratings_joined <- ratings_clean %>%
+  left_join(users_df,  by = "user_id") %>%
+  left_join(movies_df, by = "movie_id") %>%
+  select(user_id, name, movie_id, title, release_year, rating) %>%
+  arrange(name, title)
+
+head(ratings_joined, 10)
+
+```
+
+This step joins the ratings data with the users and movies tables to make the results easier to understand. Instead of using numeric IDs, we can see the user names and movie titles along with their ratings. This makes it easier to review and interpret the predicted ratings in the following steps.
+
+<a id="mySection5_0"></a>
+<font size="4">
+<B>
+Global Baseline Estimate pieces
+</B>
+</font>
+
+r_hat(u,i) = μ + b_u + b_i
+Global mean (μ)
+
+```{r}
+mu <- mean(ratings_clean$rating)
+mu
+
+
+```
+
+Here, the global average rating (μ) is computed across all observed ratings in the dataset. This value represents the overall baseline rating level and serves as the starting point for the Global Baseline Estimate prediction model.
+ 
+
+<font size="4">
+<B>
+Regularization
+</B>
+</font>
+
+Stable baseline for small datasets, keep lambda > 0 (e.g., 5 or 10) Simplest baseline, set lambda <- 0
+
+
+```{r}
+lambda <- 5
+```
+
+
+A regularization parameter (lambda) is introduced to stabilize bias estimates when users or movies have only a small number of ratings. This prevents extreme bias values caused by limited observations and produces more reliable predictions in small datasets.
+
+
+<b> User bias (b_u): regularized deviation from global mean </b>
+
+```{r}
+user_bias <- ratings_clean %>%
+  group_by(user_id) %>%
+  summarise(
+    n_user = n(),
+    user_mean = mean(rating),
+    b_u = (sum(rating - mu)) / (n_user + lambda),
+    .groups = "drop"
+  )
+```
+
+In this step, user specific bias values are calculated to capture how individual users tend to rate movies relative to the global average. Some users consistently give higher ratings, while others rate more strictly. The regularized formula adjusts these deviations to avoid overfitting.
+
+
+<b><u> Movie bias (b_i): regularized deviation from global mean </b></u>
+
+```{r}
+movie_bias <- ratings_clean %>%
+  group_by(movie_id) %>%
+  summarise(
+    n_movie = n(),
+    movie_mean = mean(rating),
+    b_i = (sum(rating - mu)) / (n_movie + lambda),
+    .groups = "drop"
+  )
+
+head(user_bias)
+
+head(movie_bias)
+
+```
+
+
+Here, movie-specific bias values are computed to reflect how certain movies tend to be rated relative to the global mean. Popular or well-received movies may have positive bias values, while lower-rated movies may have negative bias values.
+
+
+<a id="mySection61"></a>
+<font size="4">
+<B>
+Predicted ratings for observed pairs (for sanity checking
+</B>
+</font>
+
+```{r}
+predicted_observed <- ratings_clean %>%
+  left_join(user_bias,  by = "user_id") %>%
+  left_join(movie_bias, by = "movie_id") %>%
+  mutate(
+    predicted_rating = mu + b_u + b_i,
+    error = rating - predicted_rating
+  ) %>%
+  left_join(users_df,  by = "user_id") %>%
+  left_join(movies_df, by = "movie_id") %>%
+  select(name, title, rating, predicted_rating, error) %>%
+  arrange(desc(abs(error)))
+
+head(predicted_observed, 15)
+```
+
+This section uses the global mean, user bias, and movie bias to calculate predicted ratings using the Global Baseline Estimate model. By comparing the predicted ratings with the actual ratings, we can see how well the model performs and identify any differences or prediction errors.
+
+<a id="mySection5_1"></a>
+<font size="4">
+<B>
+Quick metric: RMSE on observed ratings
+</B>
+</font>
+
+
+```{r}
+rmse <- sqrt(mean((predicted_observed$error)^2, na.rm = TRUE))
+rmse
+```
+
+
+The Root Mean Squared Error (RMSE) is used to measure how accurately the baseline model predicts ratings. It gives an overall measure of the difference between the predicted and actual ratings, which helps us evaluate how well the model performs.
+
+
+<b><u> Make recommendations all users (Top-N unseen movies)</b></u>
+
+```{r}
+top_n <- 5
+```
+
+
+This section generates movie recommendations for every user in the dataset. For each user, we predict ratings for movies they have not yet rated using the Global Baseline Estimate model, then return the top-N highest predicted movies per user.
+
+<b><u> Create all user–movie combinations and attach existing ratings </b></u>
+
+```{r}
+all_pairs <- users_df %>%
+  select(user_id, name) %>%
+  tidyr::crossing(movies_df %>% select(movie_id, title, release_year)) %>%
+  left_join(ratings_clean, by = c("user_id", "movie_id"))
+```
+
+<b><u> Get the user’s bias (if missing, assume 0) and compute predicted ratings</b></u>
+
+
+```{r}
+all_scored <- all_pairs %>%
+  left_join(user_bias, by = "user_id") %>%
+  left_join(movie_bias, by = "movie_id") %>%
+  mutate(
+    b_u = ifelse(is.na(b_u), 0, b_u),
+    b_i = ifelse(is.na(b_i), 0, b_i),
+    predicted_rating = mu + b_u + b_i
+  )
+
+recommendations_all <- all_scored %>%
+  filter(is.na(rating)) %>%   # unseen movies only
+  group_by(user_id, name) %>%
+  arrange(desc(predicted_rating), .by_group = TRUE) %>%
+  slice_head(n = top_n) %>%
+  ungroup() %>%
+  select(name, title, release_year, predicted_rating) %>%
+  mutate(
+    predicted_rating = round(predicted_rating, 2)
+  )
+
+
+```
+
+<a id="mySection6"></a>
+<font size="4">
+<B>
+ Recommendations for all users
+</B>
+</font>
+
+```{r}
+recommendations_all
+```
+
+The table above shows the top movie recommendations for each user based on the Global Baseline Estimate model. For each user, the model predicts ratings for movies that they have not rated yet.
+
+The movies are then ranked based on their predicted ratings, and the highest-rated movies are selected as the top recommendations for each user.
+
+These results show that even a simple baseline recommender can provide useful movie recommendations by combining the overall average rating with user-specific and movie-specific rating patterns. Although the dataset is small, the model is still able to generate reasonable recommendations that reflect both movie popularity and individual user preferences.
+
+
+ <a id="mySection86"></a>
+<font size="4">
+<B>
+ Extension for some visualization for better analysis
+</B>
+</font>
+
+
+ <a id="mySection87"></a>
+<font size="4">
+<B>
+1. Movie bias visualization
+</B>
+</font>
+
+```{r}
+movie_bias %>%
+  left_join(movies_df, by = "movie_id") %>%
+  ggplot(aes(x = reorder(title, b_i), y = b_i)) +
+  geom_col(fill = "lightblue") +
+  geom_hline(yintercept = 0, linewidth = 0.7) +
+  coord_flip() +
+  labs(
+    title = "Movie Bias (b_i) from Global Baseline Estimate",
+    subtitle = "Positive values indicate higher than average movie ratings",
+    x = "Movie",
+    y = "Movie Bias (b_i)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+    
+```
+    
+This plot displays the movie-specific bias values from the Global Baseline Estimate model. Movies with positive bias values generally receive ratings higher than the overall average, while movies with negative bias values tend to receive lower ratings. The visualization shows how the recommender system adjusts its predictions based on differences in movie ratings.
+    
+    
+<a id="mySection88"></a>
+<font size="4">
+<B>
+ 2. User bias visualization
+</B>
+</font>
+
+
+```{r}
+user_bias %>%
+  left_join(users_df, by = "user_id") %>%
+  ggplot(aes(x = reorder(name, b_u), y = b_u)) +
+  geom_col(fill = "lightblue") +
+  geom_hline(yintercept = 0, linewidth = 0.7) +
+  coord_flip() +
+  labs(
+    title = "User Rating Bias",
+    subtitle = "Positive values indicate higher than average rating tendencies",
+    x = "User",
+    y = "User Bias (b_u)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.text.y = element_text(size = 9)
+  )
+```
+    
+This chart shows the user bias values calculated by the Global Baseline model. User bias shows how each users rating behavior differs from the overall average. Positive values mean the user generally gives higher ratings, while negative values mean the user tends to give lower ratings. This helps show how the model adjusts predictions based on each users rating behavior.
+
+    
+
+<a id="mySection89"></a>
+<font size="4">
+<B>
+ 3. Actual vs predicted ratings
+</B>
+</font>
+    
+    
+```{r}
+ggplot(predicted_observed, aes(x = rating, y = predicted_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(
+    slope = 1,
+    intercept = 0,
+    linetype = "dashed",
+    linewidth = 0.8
+  ) +
+  labs(
+    title = "Actual vs Predicted Ratings",
+    subtitle = "Points closer to the dashed line indicate more accurate predictions",
+    x = "Actual Rating",
+    y = "Predicted Rating"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.text = element_text(size = 10)
+  )
+    
+```
+    
+    
+This scatter plot compares the actual ratings with the ratings predicted by the Global Baseline Estimate model. Points closer to the diagonal line represent predictions that are closer to the actual ratings, while points farther from the line show larger prediction errors. This plot gives a visual way to understand the model's performance and works together with the RMSE value to show how closely the model predicts the observed ratings.
+    
+    
+
+<b><u> Disconnecting Database</b></u>
+
+```{r}
+dbDisconnect(con)
+```
+
+<a id="mySection90"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>
+
+For this assignment, I constructed a movie recommendation engine using the Global Baseline Estimate method in R programming language. The model consists of three important parts: the average rating, the rating tendency of the user, and the rating tendency of the movie. These are then used to make predictions of ratings of those movies which have not been rated by the user. Based on these predictions, recommendations were made to the users.
+
+From my experience, even a simple recommendation engine that is not personalized can generate some good predictions based on the rating tendencies of all users. I found it useful to look into user and movie bias plots to see how these factors influence the predicted ratings. For model evaluation, I used RMSE and actual versus predicted plots.
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
