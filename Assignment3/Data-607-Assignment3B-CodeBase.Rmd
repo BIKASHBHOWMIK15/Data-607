@@ -1,0 +1,517 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607 - Assignment 3B: Window Functions </B></h1>
+  <h3><B>Bikash Bhowmik ---- 20 Sep 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 13pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Objective</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Data Description</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Analysis Approach</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Challenges and Considerations</a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Libraries</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Defining Tickers and Date Range</a>
+<br>
+<a href="#mySection3" style="font-size: 1em; font-weight: bold;" >Pulling data from YAhoo Finance</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Writing the data into CSV file</a>
+<br>
+<a href="#mySection4" style="font-size: 1em; font-weight: bold;" >Loading the dataset</a>
+<br>
+<a href="#mySection400" style="font-size: 1em; font-weight: bold;" >Year-to-date (YTD) average close</a>
+<br>
+<a href="#mySection5" style="font-size: 1em; font-weight: bold;" >Verification (Showing last few rows for one ticker)</a>
+<br>
+<a href="#mySection5_0" style="font-size: 1em; font-weight: bold;" >Visualize close price vs. moving averages</a>
+<br>
+<a href="#mySection90" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Objective
+</B>
+</font>
+
+The goal of this assignment is to use SQL window functions to analyze time-series data for multiple items. The analysis will calculate year-to-date (YTD) averages and six-day moving averages to examine trends and changes over time.
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Data Description
+</B>
+</font>
+
+I will use daily stock price data for multiple companies, such as AAPL and MSFT, beginning on January 1, 2022. The data will be initially retrieved in R using the tidyquant package, which provides access to historical stock market data from Yahoo Finance.
+
+The dataset will contain daily observations for each company, allowing the analysis to compare stock price trends over time. To make the analysis reproducible, I will save the retrieved data as a CSV file and include the file in the GitHub repository. The analysis will then use the saved CSV file instead of retrieving the data again from Yahoo Finance.
+
+The dataset will include the following main variables:
+
+symbol – the stock ticker symbol identifying the company
+date – the date of the stock price observation
+close – the closing price of the stock for that day
+Using this time-series data, I will apply SQL window functions to calculate year-to-date averages and six-day moving averages for each company.
+
+Sample data:
+
+symbol | date       | close
+------ | ---------- | --------
+AAPL   | 2022-01-03 | 182.00999
+AAPL   | 2022-01-04 | 179.69999
+AAPL   | 2022-01-05 | 174.91999
+MSFT   | 2026-01-22 | 451.14001
+MSFT   | 2026-01-23 | 465.95001
+MSFT   | 2026-01-26 | 470.27999
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Analysis Approach
+</B>
+</font>
+
+The analysis will follow a series of steps to prepare the stock price data and calculate the required time-series measures.
+
+Retrieve the data Obtain daily stock price data for at least two companies, such as AAPL and MSFT, beginning on January 1, 2022. The data will initially be retrieved using the tidyquant package in R.
+
+Save the data for reproducibility Save the retrieved stock price data as a CSV file and include it in the GitHub repository. This will ensure that the analysis can be reproduced using the same dataset without depending on future changes to the online data source.
+
+Load and prepare the data Import the saved CSV file into R and check the data types, dates, missing values, and stock symbols. The data will be organized in chronological order for each company.
+
+Apply window functions Use dplyr window functions to perform calculations separately for each stock symbol. The observations will be ordered by date so that the calculations follow the correct time sequence.
+
+Calculate the YTD average Calculate a cumulative year-to-date (YTD) average closing price for each company. The calculation will restart at the beginning of each calendar year and will use all available closing prices from the beginning of that year up to each date.
+
+Calculate the six-day moving average Calculate a six-day moving average of the closing price for each company. This will use the current day’s closing price along with the previous five trading day observations to provide a smoother view of short term price trends.
+
+Check and visualize the results Review the calculated values using summary statistics and sample rows from the dataset. Simple visualizations may also be created to compare the actual closing prices with the YTD and six day moving averages for each stock.
+
+Document the analysis Clearly document the R code, calculations, and results in the final report and GitHub repository so that another person can follow the same steps and reproduce the analysis.
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Challenges and Considerations
+</B>
+</font>
+
+Stock market data does not include weekends and market holidays, so the six day moving average will be calculated using the six most recent available trading days rather than six consecutive calendar days. This approach will make the moving average more appropriate for stock price data.
+
+Another consideration is making sure that the year to date calculation resets correctly at the beginning of each calendar year. The data will also need to be sorted by stock symbol and date to ensure that the window calculations are performed in the correct order.
+
+Finally, I will check for missing values or duplicate records before performing the calculations, since these could affect the accuracy of the results.
+`
+
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Libraries
+</B>
+</font>
+
+library(tidyquant)<br>
+library(tidyverse)<br>
+library(lubridate)<br>
+library(slider)<br>
+
+<b> Extended visualization </b><br>
+library(ggplot2)<br>
+library(scales)<br>
+
+
+```{r global_options}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
+library(tidyquant)
+library(tidyverse)
+library(lubridate)
+library(slider)
+
+#Extended visualization
+library(ggplot2)
+library(scales)
+```
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Defining Tickers and Date Range
+</B>
+</font>
+
+```{r}
+tickers <- c(
+  "AAPL",   # Apple
+  "MSFT",   # Microsoft
+  "TSLA",   # Tesla
+  "GOOGL",  # Alphabet
+  "AMZN",   # Amazon
+  "NVDA",   # Nvidia
+  "META",   # Meta
+  "NFLX"    # Netflix
+)
+
+start_date <- "2022-01-01"
+```
+
+<a id="mySection3"></a>
+<font size="4">
+<B>
+Pulling data from YAhoo Finance
+</B>
+</font> 
+
+```{r}
+stock_data <- tq_get(
+  tickers,
+  from = start_date,
+  get = "stock.prices"
+)
+
+stock_data <- stock_data %>%
+  select(symbol, date, close)
+
+stock_data %>%
+  head(5) %>%
+  knitr::kable(
+    caption = "Stock Price Data",
+    col.names = c("Symbol", "Date", "Closing Price"),
+    digits = 2,
+    align = "c"
+  )
+```
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Writing the data into CSV file
+</B>
+</font> 
+
+```{r}
+write_csv(stock_data, "stock_data_file.csv")
+```
+
+<a id="mySection4"></a>
+<font size="4">
+<B>
+Loading the dataset
+</B>
+</font>  
+
+```{r}
+stock_data <- read_csv("stock_data_file.csv", show_col_types = FALSE)
+```
+
+ Reproducibility Note
+
+The stock data is retrieved using the `tidyquant` package instead of being loaded from a GitHub raw link. When the code runs, it retrieves the latest available stock data and saves it as `stock_data_file.csv`. This CSV file is then used for the window function analysis.
+
+
+ <B><U>Ensure date is Date type and add year column</B></U>
+
+```{r}
+stock_features <- stock_data %>%
+  mutate(
+    date = as.Date(date),
+    year = year(date)
+  ) %>%
+  arrange(symbol, date)
+```
+
+<a id="mySection5"></a>
+<font size="4">
+<B>
+Year-to-date (YTD) average close
+</B>
+</font>
+ 
+ 1) Year-to-date (YTD) average close: grouped by symbol + year, ordered by date
+
+```{r}
+stock_features <- stock_features %>%
+  group_by(symbol, year) %>%
+  arrange(date, .by_group = TRUE) %>%
+  mutate(ytd_avg_close = cummean(close)) %>%
+  ungroup()
+```
+
+Following the retrieval of the dataset, window functions in R were applied to calculate additional time-series metrics. The year-to-date (YTD) average closing price was calculated using the cummean(close) function, grouped by stock symbol and calendar year. This approach generates a cumulative average that begins at the start of each year and is updated sequentially as each new daily closing price is observed.
+
+ 2) Six day moving average close: grouped by symbol, ordered by date
+
+```{r}
+
+# .before = 5 means current day + previous 5 trading days = 6-day window
+stock_features <- stock_features %>%
+  group_by(symbol) %>%
+  arrange(date, .by_group = TRUE) %>%
+  mutate(
+    ma6_close = slide_dbl(
+      close,
+      mean,
+      .before = 5,
+      .complete = TRUE
+    )
+  ) %>%
+  ungroup()
+```
+
+For the moving average calculation, I implemented a rolling window using slider::slide_dbl(). Setting .before = 5 means the calculation includes the current trading day plus the previous five trading days, producing a 6-day moving average window for each symbol.
+
+ Quick check: show a few rows per symbol
+
+```{r}
+stock_features %>%
+  group_by(symbol) %>%
+  slice_head(n = 3) %>%
+  select(
+    Symbol = symbol,
+    Date = date,
+    `Closing Price` = close,
+    `YTD Average` = ytd_avg_close,
+    `6-Day Moving Average` = ma6_close
+  ) %>%
+  ungroup() %>%
+  mutate(
+    `Closing Price` = round(`Closing Price`, 2),
+    `YTD Average` = round(`YTD Average`, 2),
+    `6-Day Moving Average` = round(`6-Day Moving Average`, 2)
+  ) %>%
+  knitr::kable(
+    caption = "Stock Price and Window Function Results",
+    align = "c"
+  )
+```
+
+The table above shows the first 3 rows per symbol with the original closing price, the running year-to-date average (ytd_avg_close), and the 6-day moving average (ma6_close). The first few rows of ma6_close may be NA because a full 6-day window is required.
+
+<a id="mySection5"></a>
+<font size="4">
+<B>
+Verification (Showing last few rows for one ticker)
+</B>
+</font>
+ 
+
+```{r}
+stock_features %>%
+  filter(symbol == "AAPL") %>%
+  arrange(desc(date)) %>%
+  select(
+    Symbol = symbol,
+    Date = date,
+    `Closing Price` = close,
+    `YTD Average` = ytd_avg_close,
+    `6-Day Moving Average` = ma6_close
+  ) %>%
+  head(10) %>%
+  mutate(
+    `Closing Price` = round(`Closing Price`, 2),
+    `YTD Average` = round(`YTD Average`, 2),
+    `6-Day Moving Average` = round(`6-Day Moving Average`, 2)
+  ) %>%
+  knitr::kable(
+    caption = "AAPL Closing Price and Moving Average Summary",
+    digits = 2,
+    align = "c"
+  )
+
+```
+
+This output verifies the calculations for one ticker (AAPL) by showing the most recent rows. The YTD average should change gradually over the year, while the 6 day moving average responds more quickly to recent price changes.
+
+<a id="mySection5_0"></a>
+<font size="4">
+<B>
+Visualize close price vs. moving averages
+</B>
+</font>
+ 
+
+ 1) Plot for a single symbol (eg: AAPL)
+
+```{r}
+symbol_to_plot <- "AAPL"
+
+stock_features %>%
+  filter(symbol == symbol_to_plot) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = close, color = "Closing Price")) +
+  geom_line(aes(y = ytd_avg_close, color = "YTD Average")) +
+  geom_line(
+    aes(y = ma6_close, color = "6-Day Moving Average"),
+    na.rm = TRUE
+  ) +
+  scale_color_manual(
+    values = c(
+      "Closing Price" = "blue",
+      "YTD Average" = "red",
+      "6-Day Moving Average" = "darkgreen"
+    )
+  ) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(
+    title = paste("AAPL: Closing Price vs YTD Average vs 6-Day Moving Average"),
+    x = "Date",
+    y = "Price (USD)",
+    color = "Price Type"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+As an extension of the window function calculations, I created a time series plot for AAPL that compares the daily closing price, the year-to-date (YTD) average, and the six-day moving average. This plot shows how different window calculations can help explain stock price trends over time.
+
+The YTD average shows the longer-term trend because it uses all the observations within each calendar year. In comparison, the six-day moving average focuses on recent price changes by using the most recent six trading days. Comparing both averages with the actual closing price shows how window functions can smooth the data and make trends easier to see.
+
+The six-day moving average needs six observations to calculate the first value. Therefore, the first five observations for each stock have NA values because there are not enough previous data points. I used na.rm = TRUE when creating the plot so these missing values are ignored without affecting the calculation.
+
+ 2) Faceted plot for multiple symbols (optional)
+
+```{r, fig.width=14, fig.height=7}
+stock_features %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = close, color = "Closing Price")) +
+  geom_line(
+    aes(y = ma6_close, color = "6-Day Moving Average"),
+    na.rm = TRUE
+  ) +
+  facet_wrap(~ symbol, scales = "free_y") +
+  labs(
+    title = "Closing Price vs. 6-Day Moving Average",
+    x = "Date",
+    y = "Price",
+    color = "Price Type"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+I created faceted plots to compare the closing price and six-day moving average for multiple stocks. Each panel shows a different stock, making it easy to compare the moving-average patterns across companies.
+
+The six-day moving average is calculated separately for each stock using the most recent six trading days. Using separate panels makes it easier to see differences in price changes, volatility, and short-term trends between the stocks.
+
+For each stock, the first five observations do not have enough previous data to calculate the six-day moving average. These values appear as NA. I used na.rm = TRUE when creating the plots so the graphs could be displayed without warnings while keeping the calculations correct.
+
+<a id="mySection90"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>
+ 
+his assignment demonstrated how window functions can be used to analyze time series data for multiple stocks in R. Using daily stock price data for several companies since 2022, I calculated two metrics: the year-to-date (YTD) average closing price and a six-day moving average of the closing price.
+
+The YTD average helps show longer-term trends by calculating the average price within each calendar year. The six-day moving average focuses on short-term price changes by smoothing the most recent prices. Together, these calculations show how different time periods can provide different views of stock price trends.
+
+To better understand the results, I created visualizations comparing the actual closing prices with the moving averages. I also used faceted plots to compare multiple stocks. These graphs helped show how window functions can be applied within groups and how moving averages can make price trends easier to see.
+
+The assignment also focused on making the analysis reproducible. I retrieved the stock data, saved it as a CSV file, and used dplyr window functions in R to perform the analysis. The same techniques could also be used with other time series data, such as cryptocurrency prices, sales, or website traffic, to study both short-term patterns and long-term trends.
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
