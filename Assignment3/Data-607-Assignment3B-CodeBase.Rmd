@@ -319,7 +319,7 @@ For the moving average calculation, I implemented a rolling window using slider:
 ```{r}
 stock_features %>%
   group_by(symbol) %>%
-  slice_head(n = 3) %>%
+  slice_tail(n = 3) %>%
   select(
     Symbol = symbol,
     Date = date,
