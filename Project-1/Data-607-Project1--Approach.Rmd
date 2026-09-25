@@ -1,0 +1,174 @@
+---
+title: "DATA 607 - Project 1 – <br> Chess Tournament Cross-Table Parsing and Data Transformation Approach"
+author: "Bikash Bhowmik"
+date: "24-Sep-2026"
+output: html_document
+---
+
+<style>
+body {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+p, li {
+  font-size: 17px;
+}
+
+</style>
+
+## Introduction
+
+For this project, I will work with a chess tournament cross-table that is not in a tidy format. My goal is to convert the original data into a clean dataset that can be used for analysis.
+
+The final dataset will have one row for each player and include these columns:
+
+<b>•	Player Name    <br>
+•	Player State   <br>
+•	Total Points   <br>
+•	Pre-Tournament Rating  <br>
+•	Average Pre-Tournament Rating of Opponents <br></b>
+
+I chose to use the official tournament crosstable provided for the assignment. I think this dataset is complex enough to demonstrate the data cleaning and parsing skills required for this project. Each player is represented across multiple lines, and the round information includes opponent numbers and game results.
+
+## Objective
+
+The main goal is to extract the player information from the original crosstable and determine the average pre-tournament rating of each player's opponents.
+
+The most difficult part of the project is not calculating an average. The main challenge is correctly identifying each opponent and connecting that opponent to the correct pre-tournament rating.
+
+I also need to handle situations where a player did not play a particular round, such as a bye or an unplayed game. Finally, I want the entire process to be reproducible so that the same code can be run again and produce the same results.
+
+## Overall Approach 
+<br>
+<b> 1. Data Ingestion </b><br>
+I will read the tournament text file from a public URL so that the project does not depend on a file stored only on my computer.
+<br>
+I will read the file line by line and preserve the original formatting. This will allow me to work with the structure of the original cross-table.
+
+<b>2. Reconstructing Player Records</b>
+
+Each player is represented by two lines in the cross-table.
+<br>
+
+The first line contains information such as:
+
+•	Pair number <br>
+•	Player name<br>
+•	Total points<br>
+•	Results for each round<br>
+
+The second line contains information such as:
+
+•	State<br>
+•	USCF ID<br>
+•	Pre-tournament and post-tournament ratings<br>
+
+I will identify the beginning of each player record by looking for the pair number. Then I will combine the two lines belonging to the same player.
+
+Regular expressions and string manipulation will be used to extract the information I need.
+
+<b><br>3. Extracting the Variables</b><br>
+
+For each player, I will extract:
+
+•	pair_number<br>
+•	player_name<br>
+•	state<br>
+•	total_points<br>
+•	pre_rating<br>
+•	Opponent pair numbers for each round<br>
+
+The round results may look like:
+
+•	W 39<br>
+•	L 21<br>
+•	D 12<br>
+
+The letter shows the result of the game, while the number identifies the opponent. I only need the opponent number for calculating the average opponent rating.
+
+## Calculating the Average Opponent Rating 
+
+To calculate the average opponent rating, I will first create a lookup table that connects each player's pair number with their pre-tournament rating.
+
+For example:
+
+pair_number → pre_rating
+
+Then, for each player, I will collect the opponent pair numbers from all rounds.
+
+## Valid Games
+<br>
+I will only count a round as a game when it contains a result indicator (W, L, or D) followed by an opponent number.
+I will not count entries such as:
+
+•	H – half-point bye<br>
+•	B – bye<br>
+•	U – unplayed<br>
+•	X – forfeit or win by absence<br>
+
+These entries do not provide an actual opponent whose pre-tournament rating should be included in the average.
+<br>
+After identifying the valid opponents, I will join their pair numbers to the rating lookup table and calculate the mean of their pre-tournament ratings.
+<br>
+This means that a player who played all seven rounds will have the average calculated from all of their opponents, while a player who played fewer rounds will have the average calculated only from the opponents they actually played.
+<br>
+
+## Validation
+
+I will perform manual checks to make sure the program produces the correct results.
+
+## Test Case 1: Player Who Played All Games
+
+I will select a player who played all rounds and manually identify their opponents.
+This result will be compared, then find the pre-tournament rating of each opponent and calculate the average by hand. I will compare this result with the value produced by my program.
+
+## Test Case 2: Player Who Played Fewer Games
+
+I will also select a player who did not play every round.
+I will identify the rounds that were actually played and exclude byes or other non-game entries. I will then manually calculate the average opponent rating and compare it with the program's result.
+<br>
+These checks will help make sure that the opponent numbers are being parsed correctly and that the correct denominator is being used when calculating the average.
+
+## Final Output
+
+The final dataset will contain exactly one row for each player.
+The columns will be:
+
+•	Player_Name<br>
+•	State<br>
+•	Total_Points<br>
+•	Pre_Rating<br>
+•	Average_Opponent_Pre_Rating<br>
+
+The final dataset will be exported as a CSV file.<br>
+
+## Reproducibility
+
+I will keep all of the code in the Quarto file so that the complete process can be reproduced from beginning to end.
+The data will be read from a public URL rather than from a local file. There will be no manual editing of the data.
+I will also include checks to make sure that:
+<br>
+•	Exactly 64 players are processed. <br>
+•	Opponent pair numbers are between 1 and 64. <br>
+•	Opponent pair numbers successfully match a player in the rating lookup table. <br>
+•	No missing pre-tournament ratings are created after the join. <br>
+•	The final dataset contains one row per player. <br>
+
+## Possible Challenges
+
+Some challenges I expect to encounter include: <br>
+
+•	Correctly combining the two lines for each player. <br>
+•	Dealing with inconsistent spacing in the original text. <br>
+•	Correctly extracting opponent numbers from the round results. <br>
+•	Distinguishing actual games from byes and unplayed rounds. <br>
+•	Making sure that opponent numbers are connected to the correct player ratings. <br>
+•	Avoiding parsing errors that could shift information from one player to another. <br>
+
+## Conclusion
+
+This project will give me an opportunity to practice working with semi-structured data and converting it into a tidy format.
+The main focus will be on correctly parsing the original chess cross-table, identifying player and opponent information, joining opponents to their pre-tournament ratings, and calculating the average opponent rating.
+I will also use manual test cases and automated checks to verify that the results are correct. My goal is to make the entire process clear, accurate, and reproducible using R and Quarto.
+
