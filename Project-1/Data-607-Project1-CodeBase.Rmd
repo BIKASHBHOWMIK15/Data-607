@@ -1,0 +1,747 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607 - Project 1 – Chess Tournament Cross-Table Parsing and Data Transformation</B></h1>
+  <h3><B>Bikash Bhowmik ---- 27 Sep 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 13pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Introduction</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Objective</a>
+<br>
+<a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Data Loading</a>
+<br>
+<a href="#mySection21" style="font-size: 1em; font-weight: bold;" >Identifying Player Information Lines</a>
+<br>
+<a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Extracting Player Details</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Overall Approach</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Calculating the Average Opponent Rating </a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Valid Games</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Validation</a>
+<br>
+<a href="#mySection2d" style="font-size: 1em; font-weight: bold;" >Automated Validation</a>
+<br>
+<a href="#mySection5_1" style="font-size: 1em; font-weight: bold;" > Manual Verification-Step 1 </a>
+<br>
+<a href="#mySection6" style="font-size: 1em;font-weight: bold; " >Manual Verification-Step 2 </a>
+<br>
+<a href="#mySection3" style="font-size: 1em; font-weight: bold;" >Test Case 1: Player Who Played All Games</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Test Case 2: Player Who Played Fewer Games</a>
+<br>
+<a href="#mySection4" style="font-size: 1em; font-weight: bold;" >Final Output</a>
+<br>
+<a href="#mySection400" style="font-size: 1em; font-weight: bold;" >Reproducibility</a>
+<br>
+<a href="#mySection5" style="font-size: 1em; font-weight: bold;" >Data Parsing Challenges</a>
+<br>
+<a href="#mySection5_0" style="font-size: 1em; font-weight: bold;" >Code</a>
+<br>
+
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Introduction
+</B>
+</font>
+
+For this project, I worked with a chess tournament cross-table that was not in a tidy format. My goal was to convert the original data into a clean dataset that could be used for analysis.
+
+The final dataset has one row for each player and includes these columns:
+
+<b>•	Player Name    <br>
+•	Player State   <br>
+•	Total Points   <br>
+•	Pre-Tournament Rating  <br>
+•	Average Pre-Tournament Rating of Opponents <br></b>
+
+I used the tournament crosstable provided for the assignment. I think this dataset was complex enough to demonstrate the data cleaning and parsing skills required for this project. Each player is represented across multiple lines, and the round information includes opponent numbers and game results.
+
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Objective
+</B>
+</font>
+
+The main goal was to extract the player information from the original crosstable and determine the average pre-tournament rating of each player's opponents.
+
+The most difficult part of the project was not calculating an average. The main challenge was correctly identifying each opponent and connecting that opponent to the correct pre-tournament rating.
+
+I also needed to handle situations where a player did not play a particular round, such as a bye or an unplayed game. Finally, I wanted the entire process to be reproducible so that the same code could be run again and produce the same results.
+
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Data Loading
+</B>
+</font>
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(stringr)
+library(purrr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+library(tidyverse)
+```
+
+I loaded the tournament information directly from my GitHub repository using the raw text file URL.
+I used readLines() to read the file into R and then checked the number of lines and the first 10 rows to make sure the data was loaded correctly.
+
+
+```{r}
+# Read the tournament information from GitHub
+url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Project-1/tournamentinfo.txt"
+
+tournament_data <- readLines(url, warn = FALSE)
+
+# Check the data
+length(tournament_data)
+head(tournament_data, 10)
+```
+
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+Identifying Player Information Lines 
+</B>
+</font>
+
+I identified the two types of lines containing player information in the raw tournament data. I then separated these lines so that the player details could be extracted and processed correctly.
+
+```{r}
+# Identify the two types of player information lines
+is_player_line1 <- str_detect(tournament_data, "^\\s*\\d+\\s*\\|")
+is_player_line2 <- str_detect(tournament_data, "^\\s*[A-Z]{2}\\s*\\|")
+
+# Extract the player information lines
+player_line1 <- tournament_data[is_player_line1]
+player_line2 <- tournament_data[is_player_line2]
+
+# Check the number of lines found
+length(player_line1)
+length(player_line2)
+```
+
+```{r}
+# Extract information from the first player line
+pair_number <- as.integer(
+  str_match(player_line1, "^\\s*(\\d+)\\s*\\|")[, 2]
+)
+
+player_name <- str_match(
+  player_line1, "^\\s*\\d+\\s*\\|\\s*(.*?)\\s*\\|"
+)[, 2] %>%
+  str_squish()
+
+total_points <- as.numeric(
+  str_match(player_line1, "\\|\\s*([0-9]+\\.?[0-9]*)\\s*\\|")[, 2]
+)
+
+# Store the extracted information in a data frame
+player_data <- tibble(
+  pair_number = pair_number,
+  player_name = str_to_title(player_name),
+  total_points = total_points,
+  line1_raw = player_line1
+)
+
+# Display the first five players
+player_data %>%
+  slice(1:5)
+```
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Extracting Player Details
+</B>
+</font>
+
+
+I extracted the player's pair number, name, and total points from the first player information line. I stored these values in a tidy data frame for use in the next steps of the analysis.
+
+```{r}
+# Extract the state abbreviation
+state <- str_match(
+  player_line2, "^\\s*([A-Z]{2})\\s*\\|"
+)[, 2]
+
+# Extract the pre-tournament rating
+# The pattern captures the numeric value after "R:"
+pre_rating <- as.integer(
+  str_match(player_line2, "R:\\s*([0-9]+)")[, 2]
+)
+
+# Store the extracted information
+player_details <- tibble(
+  state = state,
+  pre_rating = pre_rating,
+  line2_raw = player_line2
+)
+
+# Display the first five records
+player_details %>%
+  slice(1:5)
+```
+
+```{r}
+# Combine the two sets of player information
+players <- bind_cols(
+  player_data %>%
+    select(pair_number, player_name, total_points, line1_raw),
+  player_details %>%
+    select(state, pre_rating, line2_raw)
+) %>%
+  arrange(pair_number)
+
+# Display the first 10 players
+players %>%
+  slice(1:10)
+```
+
+
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Overall Approach 
+</B>
+</font>
+
+<br>
+<b> 1. Data Ingestion </b><br>
+
+I read the tournament text file from a public URL so that the project did not depend on a file stored only on my computer.
+
+I read the file line by line and preserved the original formatting. This allowed me to work with the structure of the original cross-table.
+
+<b>2. Reconstructing Player Records</b>
+
+Each player is represented by two lines in the cross-table.
+<br>
+
+The first line contains information such as:
+
+•	Pair number <br>
+•	Player name<br>
+•	Total points<br>
+•	Results for each round<br>
+
+The second line contains information such as:
+
+•	State<br>
+•	USCF ID<br>
+•	Pre-tournament and post-tournament ratings<br>
+
+I identified the two types of player information separately and combined them in their original order after verifying that 64 records of each type were found.
+
+Regular expressions and string manipulation were used to extract the information I needed.
+
+<b><br>3. Extracting the Variables</b><br>
+
+For each player, I extracted:
+
+•	pair_number<br>
+•	player_name<br>
+•	state<br>
+•	total_points<br>
+•	pre_rating<br>
+•	Opponent pair numbers for each round<br>
+
+The round results may look like:
+
+•	W 39<br>
+•	L 21<br>
+•	D 12<br>
+
+The letter shows the result of the game, while the number identifies the opponent. I only needed the opponent number for calculating the average opponent rating.
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Calculating the Average Opponent Rating 
+</B>
+</font>
+
+To calculate the average opponent rating, I created a lookup table that connected each player's pair number with their pre-tournament rating.
+
+For example:
+
+pair_number → pre_rating
+
+Then, for each player, I collected the opponent pair numbers from all rounds and used the lookup table to obtain the corresponding pre-tournament ratings.
+
+
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Valid Games
+</B>
+</font>
+
+<br>
+I counted a round as a game when it contained a result indicator (W, L, or D) followed by an opponent number.
+I did not count entries such as:
+
+•	H – half-point bye<br>
+•	B – bye<br>
+•	U – unplayed<br>
+•	X – forfeit or win by absence<br>
+
+These entries do not provide an actual opponent whose pre-tournament rating should be included in the average.
+<br>
+After identifying the valid opponents, I used their pair numbers to look up their pre-tournament ratings and calculate the mean.
+
+This means that a player who played all seven rounds had the average calculated from all of their opponents, while a player who played fewer rounds had the average calculated only from the opponents they actually played.
+<br>
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Validation
+</B>
+</font>
+
+I performed manual checks to make sure the program produced the correct results.
+
+
+
+<a id="mySection3"></a>
+<font size="4">
+<B>
+Test Case 1: Player Who Played All Games
+</B>
+</font>
+
+I selected a player who played all rounds and manually identified their opponents. I identified the opponents, found the pre-tournament rating of each opponent, and calculated the average by hand. I then compared this result with the value produced by my program.
+
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Test Case 2: Player Who Played Fewer Games
+</B>
+</font>
+
+I selected a player who did not play every round. I identified the rounds that were actually played and excluded byes or other non-game entries. I then manually calculated the average opponent rating and compared it with the program's result.
+
+These checks helped confirm that the opponent numbers were parsed correctly and that the correct denominator was used when calculating the average.
+
+
+<a id="mySection400"></a>
+<font size="4">
+<B>
+Reproducibility
+</B>
+</font>
+
+I stored all of the code in the Quarto file so that the complete process can be reproduced from beginning to end. The data was read from a public URL rather than from a local file. There was no manual editing of the data.
+
+I also included checks to make sure that:
+<br>
+•	Exactly 64 players were processed. <br>
+•	Opponent pair numbers were between 1 and 64. <br>
+•	Opponent pair numbers successfully matched a player in the rating lookup table. <br>
+•	No missing pre-tournament ratings were created during the lookup process. <br>
+•	The final dataset contained one row per player. <br>
+
+<a id="mySection5"></a>
+<font size="4">
+<B>
+Data Parsing Challenges
+</B>
+</font>
+
+The main challenges in processing the data included: <br>
+
+•	Correctly combining the two lines for each player. <br>
+•	Dealing with inconsistent spacing in the original text. <br>
+•	Correctly extracting opponent numbers from the round results. <br>
+•	Distinguishing actual games from byes and unplayed rounds. <br>
+•	Making sure that opponent numbers are connected to the correct player ratings. <br>
+•	Avoiding parsing errors that could shift information from one player to another. <br>
+
+
+<a id="mySection5_0"></a>
+<font size="4">
+<B>
+Code
+</B>
+</font>
+
+
+
+```{r}
+# Extract opponent pair numbers from each player's tournament line
+extract_opponents <- function(line) {
+  
+  matches <- str_match_all(line, "(W|L|D)\\s*(\\d+)")[[1]]
+  
+  if (nrow(matches) == 0) {
+    return(integer(0))
+  }
+  
+  as.integer(matches[, 3])
+}
+
+# Add opponents and number of games played
+players <- players %>%
+  mutate(
+    opponents = map(line1_raw, extract_opponents),
+    games_played = map_int(opponents, length)
+  )
+
+# Display the first 12 players
+players %>%
+  select(
+    pair_number,
+    player_name,
+    total_points,
+    games_played,
+    opponents
+  ) %>%
+  slice(1:12)
+```
+
+```{r}
+# Create a lookup table for each player's pre-tournament rating
+rating_lookup <- players %>%
+  select(pair_number, pre_rating)
+
+# Match each opponent with their pre-tournament rating
+players <- players %>%
+  mutate(
+    opponent_pre_ratings = map(
+      opponents,
+      ~ rating_lookup %>%
+        filter(pair_number %in% .x) %>%
+        pull(pre_rating)
+    ),
+    
+    # Calculate the average pre-tournament rating of the opponents
+    avg_opp_pre_rating = map_dbl(
+      opponent_pre_ratings,
+      ~ if (length(.x) == 0) {
+          NA_real_
+        } else {
+          round(mean(.x), 0)
+        }
+    )
+  )
+
+# Display the results for the first 12 players
+players %>%
+  select(
+    pair_number,
+    player_name,
+    pre_rating,
+    opponents,
+    opponent_pre_ratings,
+    avg_opp_pre_rating
+  ) %>%
+  slice(1:12)
+```
+
+```{r}
+# Check the opponent ratings for player 1
+players %>%
+  filter(pair_number == 1) %>%
+  select(
+    pair_number,
+    player_name,
+    pre_rating,
+    opponents,
+    opponent_pre_ratings,
+    avg_opp_pre_rating
+  )
+```
+
+<a id="mySection5_1"></a>
+<font size="4">
+<B>
+Manual Verification-Step 1 
+</B>
+</font> 
+
+
+For Player 1 (Pair #1), the opponents played were:
+
+39, 21, 18, 14, 7, 12, 4
+
+Their corresponding pre-ratings are:
+
+1436, 1563, 1600, 1610, 1649, 1663, 1716
+
+Hand calculation:
+
+Sum = 1436 + 1563 + 1600 + 1610 + 1649 + 1663 + 1716\
+Sum = 11237
+
+Number of games played = 7
+
+Average = 11237 / 7 = 1605.2857\
+Rounded to nearest integer = 1605
+
+The program output for Player 1 is 1605, confirming correct extraction, mapping, and denominator logic.
+
+```{r}
+# Compare two selected players
+players %>%
+  filter(pair_number %in% c(12, 16)) %>%
+  select(
+    pair_number,
+    player_name,
+    pre_rating,
+    total_points,
+    games_played,
+    opponents,
+    opponent_pre_ratings,
+    avg_opp_pre_rating
+  )
+```
+
+<a id="mySection6"></a>
+<font size="4">
+<B>
+Manual Verification-Step 2 
+</B>
+</font> 
+
+For Player 16 (Pair #16), the valid games were against:
+
+10, 15, 39, 2, 36
+
+The entries "H" and "U" are excluded because they do not represent valid opponents.
+
+Their corresponding pre-ratings are:
+
+1365, 1220, 1436, 1553, 1355
+
+Hand calculation:
+
+Sum = 1365 + 1220 + 1436 + 1553 + 1355\
+Sum = 6929
+
+Number of valid games played = 5
+
+Average = 6929 / 5 = 1385.8\
+Rounded to nearest integer = 1386
+
+The program output (1386) matches the hand calculation, confirming correct handling of partial participation and exclusion of non-games.
+
+<a id="mySection2d"></a>
+<font size="4">
+<B>
+Automated Validation
+</B>
+</font> 
+
+```{r}
+# Automated Validation
+
+# Validation 1: Confirm that the tournament has exactly 64 players
+stopifnot(nrow(players) == 64)
+
+# Verify that the expected number of player records was extracted
+stopifnot(length(player_line1) == 64)
+stopifnot(length(player_line2) == 64)
+
+
+# Validation 2: Confirm that all opponent numbers are valid
+all_opponent_numbers <- unlist(players$opponents)
+
+stopifnot(
+  all(
+    all_opponent_numbers >= 1 &
+    all_opponent_numbers <= 64
+  )
+)
+
+# Validation 3: Confirm that every opponent has a valid pre-tournament rating
+all_opponent_ratings <- unlist(players$opponent_pre_ratings)
+
+stopifnot(!any(is.na(all_opponent_ratings)))
+
+
+cat("All automated validation checks passed successfully.")
+
+
+# Review the distribution of average opponent ratings
+summary(players$avg_opp_pre_rating)
+```
+
+
+<a id="mySection4"></a>
+<font size="4">
+<B>
+Final Output
+</B>
+</font>
+
+The final dataset contains exactly one row for each player. The columns are:
+
+•	Player_Name<br>
+•	State<br>
+•	Total_Points<br>
+•	Pre_Rating<br>
+•	Average_Opponent_Pre_Rating<br>
+
+The complete final dataset was exported as a CSV file.
+
+
+```{r}
+# Create the final summary dataset
+final_df <- players %>%
+  transmute(
+    Player_Name = str_to_title(player_name),
+    State = state,
+    Total_Points = total_points,
+    Pre_Rating = pre_rating,
+    Average_Opponent_Pre_Rating = round(avg_opp_pre_rating, 0)
+  )
+
+# Display the first 10 players as a table
+final_df %>%
+  slice(1:10) %>%
+  knitr::kable(
+    caption = "Chess Tournament Data Summary"
+  )
+
+# Check that the final dataset contains exactly 64 players
+stopifnot(nrow(final_df) == 64)
+
+# Check that each player appears only once in the final dataset
+stopifnot(!anyDuplicated(final_df$Player_Name))
+
+# Verify that the expected number of player records was extracted
+stopifnot(length(player_line1) == 64)
+stopifnot(length(player_line2) == 64)
+
+
+# Save the complete dataset as a CSV file
+write_csv(final_df, "Project1_Chess_Data_Summary.csv")
+```
+
+
+
+<a id="mySection86"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>  
+
+In this project, I worked with a semi-structured chess tournament cross-table and converted it into a tidy dataset using R. I extracted player names, states, total points, pre-tournament ratings, and opponent information from the original text file. I then matched each opponent with their pre-tournament rating and calculated the average pre-tournament rating of each player's opponents.
+
+I also used manual checks and automated validation to make sure the data was parsed correctly. The final dataset contains 64 players and provides the main information needed for further analysis. I created a summary table and saved the cleaned data as a CSV file. Overall, this project gave me practical experience working with semi-structured data, string parsing, data transformation, validation, and reproducible analysis in R.
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
