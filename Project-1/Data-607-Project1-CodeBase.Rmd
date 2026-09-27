@@ -463,7 +463,18 @@ players %>%
     games_played,
     opponents
   ) %>%
-  slice(1:12)
+  slice(1:12) %>%
+  knitr::kable(
+    caption = "First 12 Players"
+  ) %>%
+  kableExtra::kable_styling(
+    full_width = FALSE
+  ) %>%
+  kableExtra::column_spec(
+    4:5,
+    extra_css = "padding-left: 15px; padding-right: 15px;"
+  ) %>%
+  kableExtra::scroll_box(width = "100%")
 ```
 
 ```{r}
@@ -502,7 +513,10 @@ players %>%
     opponent_pre_ratings,
     avg_opp_pre_rating
   ) %>%
-  slice(1:12)
+  slice(1:12) %>%
+  knitr::kable(
+    caption = "First 12 Players and Opponent Information"
+  )
 ```
 
 ```{r}
