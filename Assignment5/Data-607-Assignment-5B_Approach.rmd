@@ -1,0 +1,139 @@
+---
+title: "Assignment 5B – ELO Calculations Approach"
+author: "Bikash Bhowmik"
+date: "2026-10-01"
+output: html_document
+---
+
+
+### Objective
+
+The objective of this assignment is to use the Elo rating system to estimate each player's expected tournament score and compare it with the player's actual score from the Project 1 chess tournament.
+
+The analysis will identify:
+
+
+- The five players with the largest positive difference between their actual and expected scores.
+- The five players with the largest negative difference between their actual and expected scores.
+
+### Data Source
+
+This analysis uses the structured dataset created for Project 1.
+
+The dataset contains one row for each player and includes the following variables:
+
+-   Player Name\
+-   Player State\
+-   Total Points \
+-   Pre-Tournament Rating\
+-   Average Pre-Tournament Rating of Opponents
+
+This dataset was exported as a CSV file and uploaded to GitHub to ensure reproducibility. The file will be loaded into R using the GitHub raw link.
+
+
+### ELO Expected Score
+
+The ELO rating system uses the difference between two players' ratings to estimate the expected score of a game.
+
+The expected score for a player is calculated using the following formula:
+
+$$
+E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
+$$
+
+Where:
+
+- (R_A) is Player A’s pre-tournament rating
+- (R_B) is Opponent’s pre-tournament rating
+- 400 is the scaling constant used in the Elo rating formula.
+- (E) represents the player's expected score for one game.
+
+The expected score can be interpreted as the expected number of points from a game, where a win is worth 1 point, a draw is worth 0.5 points, and a loss is worth 0 points.
+
+For example, a player with a higher rating than their opponent will have an expected score greater than 0.5, while a player with a lower rating will have an expected score below 0.5.
+
+**Sources:**\
+- Glickman, M. E. *A Comprehensive Guide to Chess Ratings*: <https://www.glicko.net/research/acjpaper.pdf>\
+- *ELO rating system* (Wikipedia): <https://en.wikipedia.org/wiki/Elo_rating_system>\
+- *The ELO Rating System for Chess and Beyond* (YouTube, 2019): <https://www.youtube.com/watch?v=AsYfbmp0To0>
+
+### Approximation Approach
+
+In a standard ELO calculation, the expected score is calculated separately for every game using the actual rating of each opponent. The expected scores from all games are then added together to obtain the player's expected tournament score.
+
+The Project 1 dataset, however, contains the average pre-tournament rating of each player's opponents rather than the individual opponent ratings for every round.
+
+Because the individual opponent ratings are not available in this dataset, I will use the average opponent rating as an approximation.
+
+The expected score for each player will therefore be calculated as:
+
+$$
+E = \frac{1}{1 + 10^{(\overline{R_{opp}} - R_{player})/400}}
+$$
+
+The expected tournament score will then be estimated by multiplying the expected score per game by the seven rounds in the tournament:
+
+$$
+\text{Expected Tournament Score} = n \times E
+$$
+
+Where:
+
+-   \(n\) = number of rounds (games) in the tournament\
+-   ({R\_{opp}}) = average opponent pre-rating
+
+This is an approximation of the standard Elo calculation because it uses the average opponent rating rather than the rating of each individual opponent.
+
+------------------------------------------------------------------------
+
+### Implementation Steps
+
+The analysis will proceed as follows:
+
+1.  **Load Project 1 dataset**
+    -   Load `Project1_Chess_Summary.csv` directly from the GitHub raw link using `read.csv()` to ensure reproducibility.
+2.  **Compute expected per-game probability**
+    -   For each player, compute expected per-game score using the Elo formula and the player’s pre-rating versus the average opponent pre-rating.
+3.  **Multiply by number of rounds**
+    -   Since the tournament consists of seven rounds, the expected per-game probability will be multiplied by the number of rounds played to estimate the player’s total expected tournament score.
+4.  **Compute performance difference**
+    -   Compute:
+
+$$
+\text{Performance Difference} = \text{Actual Score} - \text{Expected Score}
+$$
+
+-   Positive values indicate overperformance relative to rating.
+-   Negative values indicate underperformance.
+
+5.  **Rank players**
+    -   Sort players by performance difference.
+    -   Report the top five overperformers and bottom five underperformers.
+
+------------------------------------------------------------------------
+
+### Final Output
+
+The final results will include the following information:
+
+- Player Name
+- Pre-Tournament Rating
+- Actual Score
+- Expected Score
+- Performance Difference
+
+Two groups of results will be presented:
+
+<b> Top 5 Overperformers </b> 
+
+These are the five players with the largest positive difference between their actual score and their estimated expected score.
+
+<b> Top 5 Underperformers </b>
+
+These are the five players with the largest negative difference between their actual score and their estimated expected score.
+
+### Summary
+
+This analysis extends the Project 1 chess dataset by applying the Elo rating model to compare expected and actual tournament performance. Because the individual opponent ratings are not included in the Project 1 summary dataset, the average opponent rating will be used to estimate each player's expected tournament score.
+
+The resulting performance difference will provide a simple way to compare how each player performed relative to what would be expected from their pre-tournament rating and the average strength of their opponents.
