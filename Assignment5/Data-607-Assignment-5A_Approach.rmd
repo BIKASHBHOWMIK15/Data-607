@@ -1,0 +1,152 @@
+---
+title: "Assignment 5A – Airline Delays: Approach"
+author: "Bikash Bhowmik"
+date: "2026-10-01"
+output: html_document
+---
+
+## Introduction
+
+In this assignment, I will analyze airline on-time performance data for two airlines, Alaska and Amwest, across five cities. The original dataset is provided in a wide format, with separate counts for on-time and delayed flights for each airline and destination.
+
+The main goal of this assignment is to recreate the dataset in R, convert it into a tidy format, and compare the performance of the two airlines. I will first look at the overall performance of each airline and then compare their performance within each city. The comparison will focus on percentages instead of raw flight counts.
+
+An important part of the analysis will be to examine what happens if the overall comparison gives a different result from the comparisons within individual cities. I will use the data to explain why this difference can occur.
+
+------------------------------------------------------------------------
+
+## Data Analysis Approach
+
+### Dataset Preparation
+
+First, I will recreate the original dataset programmatically in R using a wide format similar to the source data. Because the original wide-format table contains blank cells used as visual grouping, I will use R code to populate those missing labels before transforming the data into tidy format.
+
+After creating the dataframe, I will export it as a CSV file using `write.csv()`. The CSV file will then be uploaded to a public GitHub repository. For the analysis, I will read the data directly from the GitHub raw URL so that the work can be reproduced without relying on a local file.
+
+The dataset will contain information for:
+
+-   **Airlines:** Alaska and Amwest
+-   **Flight status:** On Time and Delayed
+-   **Destination cities:**
+    -   Los Angeles
+    -   Phoenix
+    -   San Diego
+    -   San Francisco
+    -   Seattle
+
+------------------------------------------------------------------------
+
+### Data Loading and Validation
+
+After importing the CSV file into R, I will examine the data before making any transformations.
+
+I will:
+
+-   Check the column names and overall structure.
+-   Identify and handle any blank or missing structural values.
+-   Make sure that all flight counts are stored as numeric values.
+-   Check the totals for each airline.
+-   Check the totals for each city.
+-   Confirm that the data are complete and consistent.
+
+If any structural values are missing because of the original wide format, I will handle them programmatically before continuing with the analysis.
+
+------------------------------------------------------------------------
+
+### Data Transformation to Tidy Format
+
+The original data are in a wide format, so I will transform them into a tidy, long format using `tidyr` and `dplyr`.
+
+The final tidy dataset will contain one row for each combination of airline, city, and flight status, with the corresponding flight count.
+
+The main variables will be:
+
+-   `airline`
+-   `city`
+-   `status`
+-   `count`
+
+The `status` variable will identify whether the flights were `on_time` or `delayed`, while `count` will contain the number of flights.
+
+Using tidy data will make it easier to calculate percentages and perform consistent comparisons across airlines and cities.
+
+------------------------------------------------------------------------
+
+### Overall Airline Performance Comparison
+
+Next, I will compare the overall performance of Alaska and Amwest.
+
+For each airline, I will:
+
+1.  Calculate the total number of flights.
+2.  Calculate the total number of delayed flights.
+3.  Calculate the percentage of flights that were delayed.
+4.  Calculate the percentage of flights that were on time if needed.
+5.  Present the results in a summary table and/or visualization.
+
+The main comparison will use percentages rather than the number of delayed flights. This is important because the two airlines may have different total numbers of flights.
+
+------------------------------------------------------------------------
+
+### City-Level Airline Performance Comparison
+
+After examining the overall results, I will compare the two airlines separately within each of the five cities.
+
+For each airline and city, I will calculate the percentage of flights that were delayed. I will then compare these percentages across the cities.
+
+The results will be presented using:
+
+-   A summary table of city-level percentages.
+-   Grouped bar charts to show differences between the airlines.
+-   A short written interpretation of the main patterns.
+
+Looking at the results by city will provide more detail than the overall comparison alone and will help determine whether the overall results are consistent across individual cities.
+
+------------------------------------------------------------------------
+
+### Analysis of Overall and City-Level Differences
+
+One of the main purposes of this analysis is to determine whether the overall comparison agrees with the city-level comparisons.
+
+If the overall results and the city-level results lead to different conclusions, I will investigate why this occurs. One possible explanation is that the airlines have different distributions of flights across the five cities.
+
+The overall percentage is effectively a weighted result because cities with more flights contribute more to the overall percentage. Therefore, an airline's overall performance can be affected by where it operates more flights.
+
+For example, an airline may have a higher delay percentage in several individual cities but still have a different overall percentage if it operates a larger share of its flights in a city where its delay rate is lower.
+
+This part of the analysis will help demonstrate why it is important to consider both aggregated results and results within individual groups.
+
+------------------------------------------------------------------------
+
+## Data Considerations
+
+There are several data-related issues that I expect to address during the analysis:
+
+-   The original dataset is not in tidy format and will need to be restructured.
+-   Blank header cells may need to be handled before the data can be transformed.
+-   Flight counts must be converted to numeric values.
+-   Percentage calculations must use the correct denominator.
+-   Raw flight counts should not be used as a direct measure of airline performance when the airlines have different numbers of flights.
+-   The overall results and city-level results need to be interpreted separately.
+-   Any difference between the overall and city-level comparisons should be explained using the distribution of flights across cities.
+
+------------------------------------------------------------------------
+
+## Reproducible Analysis
+
+I will use the following steps to make the analysis reproducible:
+
+-   Store the recreated CSV file in a public GitHub repository.
+-   Read the dataset from the GitHub raw URL rather than from a local computer path.
+-   Use R and `tidyverse` functions for the data transformation and analysis.
+-   Keep the data-cleaning and transformation steps in the Quarto document.
+-   Avoid using local file paths so that the code can be run on another computer.
+-   Make sure that the complete analysis can be reproduced in a clean R environment.
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+This approach will allow me to recreate the airline delay dataset, clean and organize the data, and compare Alaska and Amwest using percentage-based measures. I will examine both overall airline performance and performance within each city.
+
+The final part of the analysis will focus on explaining any difference between the overall and city-level comparisons. This will help show how the distribution of flights across cities can affect an aggregated result and why examining the data at more than one level is important.
