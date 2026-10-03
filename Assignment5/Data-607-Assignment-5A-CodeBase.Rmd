@@ -1,0 +1,574 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607-Assignment 5A – Airline Delays: CodeBase</B></h1>
+  <h3><B>Bikash Bhowmik ---- 03-Oct-2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 14pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Introduction</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Data Analysis Approach</a>
+<br>
+<a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Dataset Preparation</a>
+<br>
+<a href="#mySection21" style="font-size: 1em; font-weight: bold;" >Data Loading and Validation</a>
+<br>
+<a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Data Transformation to Tidy Format</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Overall Airline Performance Comparison</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >City-Level Airline Performance Comparison</a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Analysis of Overall and City-Level Differences</a>
+<br>
+<a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Data Considerations</a>
+<br>
+<a href="#mySection3a" style="font-size: 1em; font-weight: bold;" >Reproducible Analysis</a>
+<br>
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Introduction
+</B>
+</font>
+
+In this assignment, I will analyze airline on-time performance data for two airlines, Alaska and Amwest, across five cities. The original dataset is provided in a wide format, with separate counts for on-time and delayed flights for each airline and destination.
+
+The main goal of this assignment is to recreate the dataset in R, convert it into a tidy format, and compare the performance of the two airlines. I will first look at the overall performance of each airline and then compare their performance within each city. The comparison will focus on percentages instead of raw flight counts.
+
+An important part of the analysis will be to examine what happens if the overall comparison gives a different result from the comparisons within individual cities. I will use the data to explain why this difference can occur.
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Data Analysis Approach
+</B>
+</font>
+
+The analysis will begin by recreating the original airline delay dataset and transforming it into a tidy format. I will calculate the percentage of delayed flights for each airline overall and within each city. The results will be presented using tables and visualizations to compare Alaska and Amwest. Finally, I will compare the overall and city-level results to examine how differences in flight distribution across cities may affect the overall comparison.
+
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Dataset Preparation
+</B>
+</font>
+
+First, I will recreate the original dataset programmatically in R using a wide format similar to the source data. Because the original wide-format table contains blank cells used as visual grouping, I will use R code to populate those missing labels before transforming the data into tidy format.
+
+After creating the dataframe, I will export it as a CSV file using `write.csv()`. The CSV file will then be uploaded to a public GitHub repository. For the analysis, I will read the data directly from the GitHub raw URL so that the work can be reproduced without relying on a local file.
+
+The dataset will contain information for:
+
+-   **Airlines:** Alaska and Amwest
+-   **Flight status:** On Time and Delayed
+-   **Destination cities:**
+    -   Los Angeles
+    -   Phoenix
+    -   San Diego
+    -   San Francisco
+    -   Seattle
+
+Dataset Preparation (and intentionally include missing structural values)
+
+Below I create the dataset in wide format to match the original structure (cities as columns). To satisfy the “populate missing data” requirement, I intentionally leave the airline name as NA on the second row of each airline block and later fill it in programmatically.
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+```
+
+```{r}
+airline_wide_raw <- tibble::tibble(
+  Airline = c("ALASKA", NA, "AMWEST", NA),
+  Status  = c("on_time", "delayed", "on_time", "delayed"),
+  `Los Angeles`   = c(497,  62,  694, 117),
+  Phoenix         = c(221,  12, 4840, 415),
+  `San Diego`     = c(212,  20,  383,  65),
+  `San Francisco` = c(503, 102,  320, 129),
+  Seattle         = c(1841,305,  201,  61)
+)
+
+airline_wide_raw
+```
+
+
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+Data Loading and Validation
+</B>
+</font>
+
+After importing the CSV file into R, I will examine the data before making any transformations.
+
+I will:
+
+-   Check the column names and overall structure.
+-   Identify and handle any blank or missing structural values.
+-   Make sure that all flight counts are stored as numeric values.
+-   Check the totals for each airline.
+-   Check the totals for each city.
+-   Confirm that the data are complete and consistent.
+
+If any structural values are missing because of the original wide format, I will handle them programmatically before continuing with the analysis.
+
+```{r}
+airline_wide <- airline_wide_raw %>%
+  tidyr::fill(Airline, .direction = "down")
+
+airline_wide
+```
+
+<b> Save CSV, upload to GitHub, then read back via Raw link (reproducibility) </b>
+
+This writes the recreated wide dataset to a CSV.
+
+```{r}
+csv_name <- "Airline_delays_wide_data.csv"
+
+if (!file.exists(csv_name)) {
+  write.csv(airline_wide, csv_name, row.names = FALSE)
+}
+
+## list.files()
+```
+
+```{r}
+dataset <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment5/Airline_delays_wide_data.csv"
+
+airline_wide_from_source <- if (nzchar(dataset)) {
+  read.csv(dataset, check.names = FALSE)
+} else {
+  read.csv(csv_name, check.names = FALSE)
+}
+
+airline_wide_from_source
+```
+
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Data Transformation to Tidy Format
+</B>
+</font>
+
+
+The original data are in a wide format, so I will transform them into a tidy, long format using `tidyr` and `dplyr`.
+
+The final tidy dataset will contain one row for each combination of airline, city, and flight status, with the corresponding flight count.
+
+The main variables will be:
+
+-   `airline`
+-   `city`
+-   `status`
+-   `count`
+
+The `status` variable will identify whether the flights were `on_time` or `delayed`, while `count` will contain the number of flights.
+
+Using tidy data will make it easier to calculate percentages and perform consistent comparisons across airlines and cities.
+
+Converted from wide format (cities as columns) to long format where each row is:
+
+Airline, Status, City, Count
+
+```{r}
+airline_long <- airline_wide_from_source %>%
+  as_tibble() %>%
+  pivot_longer(
+    cols = -c(Airline, Status),
+    names_to = "City",
+    values_to = "Count"
+  ) %>%
+  mutate(
+    Airline = as.factor(Airline),
+    Status  = as.factor(Status),
+    City    = as.factor(City),
+    Count   = as.integer(Count)
+  )
+
+airline_long %>% arrange(Airline, City, Status)
+```
+
+
+```{r}
+# Total flights by airline
+airline_long %>%
+  group_by(Airline) %>%
+  summarise(total_flights = sum(Count), .groups = "drop")
+
+# Total flights by airline and city
+airline_long %>%
+  group_by(Airline, City) %>%
+  summarise(total_flights = sum(Count), .groups = "drop") %>%
+  arrange(Airline, desc(total_flights))
+```
+
+
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Overall Airline Performance Comparison
+</B>
+</font>
+
+
+Next, I will compare the overall performance of Alaska and Amwest.
+
+For each airline, I will:
+
+1.  Calculate the total number of flights.
+2.  Calculate the total number of delayed flights.
+3.  Calculate the percentage of flights that were delayed.
+4.  Calculate the percentage of flights that were on time if needed.
+5.  Present the results in a summary table and/or visualization.
+
+The main comparison will use percentages rather than the number of delayed flights. This is important because the two airlines may have different total numbers of flights.
+
+
+```{r}
+overall_perf <- airline_long %>%
+  group_by(Airline, Status) %>%
+  summarise(n = sum(Count), .groups = "drop") %>%
+  group_by(Airline) %>%
+  mutate(
+    total = sum(n),
+    pct = n / total
+  ) %>%
+  ungroup()
+
+overall_perf
+```
+
+## Overall percent delayed (table):
+
+```{r}
+
+overall_delayed <- overall_perf %>%
+  filter(Status == "delayed") %>%
+  transmute(
+    Airline,
+    delayed = n,
+    total,
+    pct_delayed = pct
+  )
+
+overall_delayed
+```
+
+## Overall percent delayed (chart):
+
+```{r}
+overall_delayed %>%
+  ggplot(aes(x = Airline, y = pct_delayed)) +
+  geom_col(fill = "lightblue") +
+  geom_text(
+    aes(label = scales::percent(pct_delayed, accuracy = 0.1)),
+    vjust = -0.3,
+    size = 4
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  labs(
+    title = "Overall Percentage of Delayed Flights by Airline",
+    x = "Airline",
+    y = "Percentage of Delayed Flights"
+  )
+```
+
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+City-Level Airline Performance Comparison
+</B>
+</font>
+
+After examining the overall results, I will compare the two airlines separately within each of the five cities.
+
+For each airline and city, I will calculate the percentage of flights that were delayed. I will then compare these percentages across the cities.
+
+The results will be presented using:
+
+-   A summary table of city-level percentages.
+-   Grouped bar charts to show differences between the airlines.
+-   A short written interpretation of the main patterns.
+
+Looking at the results by city will provide more detail than the overall comparison alone and will help determine whether the overall results are consistent across individual cities.
+
+
+```{r}
+
+city_perf <- airline_long %>%
+  group_by(Airline, City, Status) %>%
+  summarise(n = sum(Count), .groups = "drop") %>%
+  group_by(Airline, City) %>%
+  mutate(
+    total = sum(n),
+    pct = n / total
+  ) %>%
+  ungroup()
+
+city_delayed <- city_perf %>%
+  filter(Status == "delayed") %>%
+  transmute(Airline, City, delayed = n, total, pct_delayed = pct)
+
+city_delayed %>% arrange(City, Airline)
+
+
+```
+
+## City-by-city percent delayed (chart):
+
+```{r}
+city_delayed %>%
+  ggplot(aes(x = City, y = pct_delayed, fill = Airline)) +
+  geom_col(position = "dodge") +
+  geom_text(
+    aes(label = scales::percent(pct_delayed, accuracy = 0.1)),
+    position = position_dodge(width = 0.9),
+    hjust = -0.1,
+    size = 3.5
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    expand = expansion(mult = c(0, 0.15))
+  ) +
+  coord_flip() +
+  labs(
+    title = "Percentage of Delayed Flights by City",
+    x = "City",
+    y = "Delayed Flights (%)",
+    fill = "Airline"
+  )
+```
+
+
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Analysis of Overall and City-Level Differences
+</B>
+</font>
+
+One of the main purposes of this analysis is to determine whether the overall comparison agrees with the city-level comparisons.
+
+If the overall results and the city-level results lead to different conclusions, I will investigate why this occurs. One possible explanation is that the airlines have different distributions of flights across the five cities.
+
+The overall percentage is effectively a weighted result because cities with more flights contribute more to the overall percentage. Therefore, an airline's overall performance can be affected by where it operates more flights.
+
+For example, an airline may have a higher delay percentage in several individual cities but still have a different overall percentage if it operates a larger share of its flights in a city where its delay rate is lower.
+
+This part of the analysis will help demonstrate why it is important to consider both aggregated results and results within individual groups.
+
+<a id="mySection2c"></a>
+<font size="4">
+<B>
+Data Considerations
+</B>
+</font>
+
+There are several data-related issues that I expect to address during the analysis:
+
+-   The original dataset is not in tidy format and will need to be restructured.
+-   Blank header cells may need to be handled before the data can be transformed.
+-   Flight counts must be converted to numeric values.
+-   Percentage calculations must use the correct denominator.
+-   Raw flight counts should not be used as a direct measure of airline performance when the airlines have different numbers of flights.
+-   The overall results and city-level results need to be interpreted separately.
+-   Any difference between the overall and city-level comparisons should be explained using the distribution of flights across cities.
+
+<a id="mySection3a"></a>
+<font size="4">
+<B>
+Reproducible Analysis
+</B>
+</font>
+
+I will use the following steps to make the analysis reproducible:
+
+-   Store the recreated CSV file in a public GitHub repository.
+-   Read the dataset from the GitHub raw URL rather than from a local computer path.
+-   Use R and `tidyverse` functions for the data transformation and analysis.
+-   Keep the data-cleaning and transformation steps in the Quarto document.
+-   Avoid using local file paths so that the code can be run on another computer.
+-   Make sure that the complete analysis can be reproduced in a clean R environment.
+
+
+
+```{r}
+city_winner <- city_delayed %>%
+  group_by(City) %>%
+  slice_min(order_by = pct_delayed, n = 1, with_ties = TRUE) %>%
+  ungroup() %>%
+  select(City, Airline, pct_delayed) %>%
+  arrange(City)
+
+city_winner
+```
+
+From the overall comparison, **AMWEST appears to perform better overall**, with a lower delayed rate (\~10.9%) than ALASKA (\~13.3%). However, the city-by-city results show the opposite pattern: **ALASKA has a lower delayed percentage in every one of the five cities**. This difference between the aggregated (overall) result and the stratified (city-level) result is the key discrepancy explored next.
+
+## Explaining the discrepancy
+
+##  Why overall and city-by-city comparisons can disagree
+
+Overall rates are weighted by how many flights each airline has in each city. To show this, I compute each airline’s flight volume by city (weights).
+
+```{r}
+weights <- airline_long %>%
+  group_by(Airline, City) %>%
+  summarise(
+    city_total = sum(Count),
+    .groups = "drop"
+  ) %>%
+  group_by(Airline) %>%
+  mutate(
+    airline_total = sum(city_total),
+    weight = city_total / airline_total
+  ) %>%
+  ungroup() %>%
+  arrange(Airline, desc(weight))
+
+weights %>%
+  knitr::kable(
+    col.names = c(
+      "Airline",
+      "City",
+      "City Total",
+      "Airline Total",
+      "Flight Weight"
+    ),
+    digits = 3
+  )
+```
+
+```{r}
+city_delayed %>%
+  left_join(weights, by = c("Airline", "City")) %>%
+  select(Airline, City, pct_delayed, city_total, weight) %>%
+  arrange(City, Airline) %>%
+  knitr::kable(
+    col.names = c("Airline", "City", "Delayed %", "Total Flights", "Flight Weight"),
+    digits = 3
+  )
+```
+
+<a id="mySection86"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>  
+
+
+This approach will allow me to recreate the airline delay dataset, clean and organize the data, and compare Alaska and Amwest using percentage-based measures. I will examine both overall airline performance and performance within each city.
+
+The final part of the analysis will focus on explaining any difference between the overall and city-level comparisons. This will help show how the distribution of flights across cities can affect an aggregated result and why examining the data at more than one level is important.
+
+ 
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
