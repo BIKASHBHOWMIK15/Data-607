@@ -1,0 +1,441 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607-Assignment 5B – ELO Calculations: CodeBase</B></h1>
+  <h3><B>Bikash Bhowmik ---- 03-Oct-2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 15pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Introduction</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Objective</a>
+<br>
+<a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Data Source</a>
+<br>
+<a href="#mySection21" style="font-size: 1em; font-weight: bold;" > ELO Expected Score</a>
+<br>
+<a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Approximation Approach</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Implementation Steps</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Final Output</a>
+<br>
+<a href="#mySection2bc" style="font-size: 1em; font-weight: bold;" >Visualization</a>
+<br>
+<a href="#mySection2bb" style="font-size: 1em; font-weight: bold;" >Summary</a>
+<br>
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Introduction
+</B>
+</font>
+
+The Elo rating system is commonly used to estimate the expected performance of chess players based on their ratings. In this assignment, I use the Elo formula to calculate each player's expected tournament score and compare it with their actual score. The difference between the expected and actual scores is used to identify players who performed above or below expectations.
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Objective
+</B>
+</font>
+
+The objective of this assignment is to use the Elo rating system to estimate each player's expected tournament score and compare it with the player's actual score from the Project 1 chess tournament.
+
+The analysis will identify:
+
+
+- The five players with the largest positive difference between their actual and expected scores.
+- The five players with the largest negative difference between their actual and expected scores.
+
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Data Source
+</B>
+</font>
+
+This analysis uses the structured dataset created for Project 1.
+
+The dataset contains one row for each player and includes the following variables:
+
+-   Player Name\
+-   Player State\
+-   Total Points \
+-   Pre-Tournament Rating\
+-   Average Pre-Tournament Rating of Opponents
+
+This dataset was exported as a CSV file from Project 1 . The file will be loaded into R using the GitHub raw link.
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(knitr)
+```
+
+
+```{r}
+chess <- read.csv(
+  "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Project-1/Project1_Chess_Data_Summary.csv"
+)
+
+chess <- as_tibble(chess)
+
+glimpse(chess)
+colnames(chess)
+```
+
+
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+ELO Expected Score
+</B>
+</font>
+
+The ELO rating system uses the difference between two players' ratings to estimate the expected score of a game.
+
+The expected score for a player is calculated using the following formula:
+
+$$
+E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
+$$
+
+Where:
+
+- (R_A) is Player A’s pre-tournament rating
+- (R_B) is Opponent’s pre-tournament rating
+- 400 is the scaling constant used in the Elo rating formula.
+- (E) represents the player's expected score for one game.
+
+The expected score can be interpreted as the expected number of points from a game, where a win is worth 1 point, a draw is worth 0.5 points, and a loss is worth 0 points.
+
+For example, a player with a higher rating than their opponent will have an expected score greater than 0.5, while a player with a lower rating will have an expected score below 0.5.
+
+**Sources:**\
+- Glickman, M. E. *A Comprehensive Guide to Chess Ratings*: <https://www.glicko.net/research/acjpaper.pdf>\
+- *ELO rating system* (Wikipedia): <https://en.wikipedia.org/wiki/Elo_rating_system>\
+- *The ELO Rating System for Chess and Beyond* (YouTube, 2019): <https://www.youtube.com/watch?v=AsYfbmp0To0>
+
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Approximation Approach
+</B>
+</font>
+
+In a standard ELO calculation, the expected score is calculated separately for every game using the actual rating of each opponent. The expected scores from all games are then added together to obtain the player's expected tournament score.
+
+The Project 1 dataset, however, contains the average pre-tournament rating of each player's opponents rather than the individual opponent ratings for every round.
+
+Because the individual opponent ratings are not available in this dataset, I will use the average opponent rating as an approximation.
+
+The expected score for each player will therefore be calculated as:
+
+$$
+E = \frac{1}{1 + 10^{(\overline{R_{opp}} - R_{player})/400}}
+$$
+
+The expected tournament score will then be estimated by multiplying the expected score per game by the seven rounds in the tournament:
+
+$$
+\text{Expected Tournament Score} = n \times E
+$$
+
+Where:
+
+-   \(n\) = number of rounds (games) in the tournament\
+-   ({R\_{opp}}) = average opponent pre-rating
+
+This is an approximation of the standard Elo calculation because it uses the average opponent rating rather than the rating of each individual opponent.
+
+
+Because the Project 1 output retains only the average opponent pre-rating (not the full opponent list), I approximated the expected tournament score by computing expected per-game score versus the average opponent rating, then multiplying by the number of rounds played.
+
+In this tournament there are 7 rounds, so we use `n_rounds = 7`.
+
+```{r}
+n_rounds <- 7
+
+elo_expected <- function(r_player, r_opp_avg) {
+  1 / (1 + 10^((r_opp_avg - r_player) / 400))
+}
+
+results <- chess %>%
+  mutate(
+    expected_per_game = elo_expected(Pre_Rating, Average_Opponent_Pre_Rating),
+    expected_score = n_rounds * expected_per_game,
+    actual_score = Total_Points,
+    performance_diff = actual_score - expected_score
+  )
+
+results %>%
+  select(Player_Name, State, Pre_Rating, Average_Opponent_Pre_Rating, actual_score, expected_score, performance_diff) %>%
+  arrange(desc(performance_diff)) %>%
+  head(10) %>%
+  kable(digits = 3, caption = "Top 10 players by performance difference (Actual - Expected)")
+```
+
+
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Implementation Steps
+</B>
+</font>
+
+
+The analysis will proceed as follows:
+
+1.  **Load Project 1 dataset**
+    -   Load `Project1_Chess_Data_Summary.csv` directly from the GitHub raw link using `read.csv()` to ensure reproducibility.
+2.  **Compute expected per-game probability**
+    -   For each player, compute expected per-game score using the Elo formula and the player’s pre-rating versus the average opponent pre-rating.
+3.  **Multiply by number of rounds**
+    -   Since the tournament consists of seven rounds, the expected per-game probability will be multiplied by the number of rounds played to estimate the player’s total expected tournament score.
+4.  **Compute performance difference**
+    -   Compute:
+
+$$
+\text{Performance Difference} = \text{Actual Score} - \text{Expected Score}
+$$
+
+-   Positive values indicate overperformance relative to rating.
+-   Negative values indicate underperformance.
+
+5.  **Rank players**
+    -   Sort players by performance difference.
+    -   Report the top five overperformers and bottom five underperformers.
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Final Output
+</B>
+</font>
+
+The final results will include the following information:
+
+- Player Name
+- Pre-Tournament Rating
+- Actual Score
+- Expected Score
+- Performance Difference
+
+Two groups of results will be presented:
+
+<b> Top 5 Overperformers </b> 
+
+These are the five players with the largest positive difference between their actual score and their estimated expected score.
+
+```{r}
+top_5_over <- results %>%
+  arrange(desc(performance_diff)) %>%
+  select(Player_Name, State, Pre_Rating, actual_score, expected_score, performance_diff) %>%
+  slice(1:5)
+
+kable(top_5_over, digits = 3, caption = "Top 5 Overperformers (Actual - Expected)")
+```
+
+
+<b> Top 5 Underperformers </b>
+
+These are the five players with the largest negative difference between their actual score and their estimated expected score.
+
+```{r}
+top_5_under <- results %>%
+  arrange(performance_diff) %>%
+  select(Player_Name, State, Pre_Rating, actual_score, expected_score, performance_diff) %>%
+  slice(1:5)
+
+kable(top_5_under, digits = 3, caption = "Top 5 Underperformers (Actual - Expected)")
+```
+
+
+<a id="mySection2bc"></a>
+<font size="4">
+<B>
+Visualization
+</B>
+</font>
+
+
+The histogram shows the distribution of performance differences between actual and expected scores.
+Positive values indicate players who scored more points than expected, while negative values indicate players who scored fewer points than expected.
+The numbers above the bars show the number of players in each performance-difference range.
+
+
+```{r}
+ggplot(results, aes(x = performance_diff)) +
+  geom_histogram(
+    bins = 15,
+    fill = "lightblue",
+    color = "black"
+  ) +
+  geom_text(
+    stat = "bin",
+    bins = 15,
+    aes(label = after_stat(count)),
+    vjust = -0.5
+  ) +
+  labs(
+    title = "Distribution of Performance Difference (Actual - Expected)",
+    x = "Performance Difference",
+    y = "Number of Players"
+  ) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0.02, 0.08))
+  ) +
+  theme_minimal()
+```
+
+
+```{r}
+ggplot(results, aes(x = Pre_Rating, y = performance_diff)) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Pre-Tournament Rating vs. Performance Difference",
+    x = "Pre-Tournament Rating",
+    y = "Performance Difference (Actual - Expected)"
+  ) +
+  theme_minimal()
+```
+ 
+ This scatter plot shows the relationship between pre-tournament rating and performance difference. Players above zero scored more points than expected, while players below zero scored fewer points than expected. It helps show how actual performance compared with Elo-based expectations.
+
+  
+<a id="mySection2bb"></a>
+<font size="4">
+<B>
+Summary
+</B>
+</font>
+
+This analysis extends the Project 1 chess dataset by applying the Elo rating model to compare expected and actual tournament performance. Because the individual opponent ratings are not included in the Project 1 summary dataset, the average opponent rating will be used to estimate each player's expected tournament score.
+
+The resulting performance difference will provide a simple way to compare how each player performed relative to what would be expected from their pre-tournament rating and the average strength of their opponents.
+
+
+<a id="mySection86"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>  
+
+Players with the largest positive performance differences scored considerably more points than expected based on their pre-tournament ratings and average opponent ratings. Several lower-rated players performed well above their rating-based expectations.
+
+In contrast, players with the largest negative performance differences scored fewer points than expected based on the Elo model. These differences show where actual tournament results differed most from the expected results.
+
+Because the expected scores were calculated using each player’s average opponent rating rather than the rating of each opponent in individual games, the results are an approximation of standard Elo expectations. Even with this limitation, the analysis provides a useful way to identify players whose actual performance differed most from their expected performance.
+
+
+
+
+<br>
+<br>
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
