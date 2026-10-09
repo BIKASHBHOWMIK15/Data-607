@@ -1,0 +1,1056 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607- Project 2– Data Transformations --CodeBase</B></h1>
+  <h3><B>Bikash Bhowmik ---- 10 Oct 2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 14pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:200px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Introduction</a>
+<br>
+<a href="#mySection01" style="font-size: 1em; font-weight: bold;" >Dataset 1: COVID World Vaccination Progress</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Data Source</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Data Loading and Initial Inspection</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21" style="font-size: 1em; font-weight: bold;" >Data Structure Before Tidying</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Tidy Data Transformation</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection022" style="font-size: 1em; font-weight: bold;" >Validation of the Tidy Dataset</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection0022" style="font-size: 1em; font-weight: bold;" >Missing Value Handling</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Analysis and Visualization</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Vaccination Coverage Countries </a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySectionb2b" style="font-size: 1em; font-weight: bold;" >Vaccination Progress Over Time</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection2c" style="font-size: 1em; font-weight: bold;" >Interpretation and Key Findings</a>
+<br>
+<a href="#mySection02" style="font-size: 1em; font-weight: bold;" >Dataset 2: Renewable Power Plants</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySectiond2" style="font-size: 1em; font-weight: bold;" >Data Source</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21d" style="font-size: 1em; font-weight: bold;" >Data Loading and Initial Inspection</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21e" style="font-size: 1em; font-weight: bold;" >Data Structure Before Tidying</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21f" style="font-size: 1em; font-weight: bold;" >Tidy Data Transformation</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21g" style="font-size: 1em; font-weight: bold;" >Missing Value Handling</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21h" style="font-size: 1em; font-weight: bold;" >Analysis and Visualization</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySection21m" style="font-size: 1em; font-weight: bold;" >Total Installed Renewable Energy Capacity</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySection21n" style="font-size: 1em; font-weight: bold;" >Total Renewable Energy Capacity</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection21j" style="font-size: 1em; font-weight: bold;" >Interpretation and Key Findings</a>
+<br>
+<a href="#mySection5a" style="font-size: 1em; font-weight: bold;" >Dataset 3: World GDP by Country (1960–2022)</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5b" style="font-size: 1em; font-weight: bold;" >Data Source</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5c" style="font-size: 1em; font-weight: bold;" >Data Loading and Initial Inspection</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5d" style="font-size: 1em; font-weight: bold;" >Data Structure Before Tidying</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5e" style="font-size: 1em; font-weight: bold;" >Tidy Data Transformation</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5f" style="font-size: 1em; font-weight: bold;" >Validation of the Tidy Dataset</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5g" style="font-size: 1em; font-weight: bold;" >Missing Value Handling</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5h" style="font-size: 1em; font-weight: bold;" >Analysis and Visualization</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySection5m" style="font-size: 1em; font-weight: bold;" >GDP Trends for Selected Countries</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#mySection5n" style="font-size: 1em; font-weight: bold;" >Average GDP for Selected Countries</a>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#mySection5j" style="font-size: 1em; font-weight: bold;" >Interpretation and Key Findings</a>
+<br>
+<a href="#mySection0000" style="font-size: 1em; font-weight: bold;" >Conclusion</a>
+<br>
+ </div>
+ 
+ 
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Introduction
+</B>
+</font>
+
+The objective of this project was to gain practical experience in transforming wide-format datasets into tidy datasets suitable for analysis and visualization. In many real-world datasets, related variables are stored across multiple columns, which can make the data more difficult to analyze. Following the tidy data principles described by Hadley Wickham, the datasets were organized so that each variable formed a column, each observation formed a row, and each type of observational unit was represented appropriately.
+
+Using the `tidyr` and `dplyr` packages in R, this project demonstrated how wide-format datasets could be transformed into tidy formats through reproducible data transformation workflows.
+
+Each dataset was first examined in its original format and then reshaped into a structure that was easier to analyze, summarize, and visualize.
+
+Three independent datasets from Discussion 5A were used in this project:
+
+1. <a href="https://www.kaggle.com/datasets/gpreda/covid-world-vaccination-progress" target="_blank">COVID World Vaccination Progress</a>
+2. <a href="https://www.kaggle.com/datasets/eugeniyosetrov/renewable-power-plants" target="_blank">Renewable Power Plants / Renewable Capacity Time Series</a>
+3. <a href="https://www.kaggle.com/datasets/annafabris/world-gdp-by-country-1960-2022" target="_blank">World GDP by Country (1960–2022)</a>
+
+Each dataset represented a different data transformation scenario. By restructuring these datasets into tidy formats, the project demonstrated how appropriate data organization supported meaningful analysis and visualization.
+
+<a id="mySection01"></a>
+<font size="4">
+<B>
+Dataset 1: COVID World Vaccination Progress
+</B>
+</font>
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Data Source
+</B>
+</font>
+
+Dataset: COVID World Vaccination Progress <br>  
+Source: Kaggle<br>  
+Link: <a href="https://www.kaggle.com/datasets/gpreda/covid-world-vaccination-progress" target="_blank">COVID World Vaccination Progress</a>
+
+This dataset was used to examine COVID-19 vaccination progress across countries. It contained several vaccination-related measures, including total vaccinations, the number of people vaccinated, the number of people fully vaccinated, and daily vaccination rates.
+
+The dataset provided an opportunity to demonstrate how multiple vaccination measures could be reorganized into a tidy format. After the transformation, the data was easier to compare across countries and analyze over time using R.
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Data Loading and Initial Inspection
+</B>
+</font>
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(scales)
+
+theme_set(theme_minimal())
+```
+
+```{r}
+covid_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Project-2/COVID-19-World-Vaccination.csv"
+```
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+Data Structure Before Tidying
+</B>
+</font>
+
+
+
+The dataset contained several vaccination-related measures stored in separate columns. Although these columns provided useful information, similar types of measurements were spread across multiple variables rather than being represented by a single variable identifying the vaccination metric.
+
+This structure was treated as a partially wide format because different vaccination measures were stored in separate columns.
+
+```{r}
+covid_raw <- read_csv(covid_url)
+
+dim(covid_raw)
+names(covid_raw)
+glimpse(covid_raw)
+covid_raw %>% slice_head(n = 10)
+```
+
+The original dataset contained several vaccination measures stored in separate columns, such as total_vaccinations, people_vaccinated, people_fully_vaccinated, and related rate variables. This made the dataset partially wide because similar measurements were spread across multiple columns instead of being represented as values in a single variable. To reshape this structure, the related measurement columns were transformed into two variables: metric and value.
+
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Tidy Data Transformation
+</B>
+</font> 
+
+```{r}
+covid_tidy <- covid_raw %>%
+  mutate(date = as.Date(date)) %>%
+  pivot_longer(
+    cols = c(
+      total_vaccinations,
+      people_vaccinated,
+      people_fully_vaccinated,
+      daily_vaccinations_raw,
+      daily_vaccinations,
+      total_vaccinations_per_hundred,
+      people_vaccinated_per_hundred,
+      people_fully_vaccinated_per_hundred,
+      daily_vaccinations_per_million
+    ),
+    names_to = "metric",
+    values_to = "value"
+  ) %>%
+  rename_with(tolower) %>%
+  mutate(metric = str_replace_all(metric, "_", " ")) %>%
+  filter(!is.na(value))
+
+glimpse(covid_tidy)
+
+covid_tidy %>%
+  slice_head(n = 10) %>%
+  knitr::kable(
+    caption = "First 10 Rows of the Tidied COVID-19 Vaccination Dataset",
+    digits = 2,
+    align = "c",
+    format = "html"
+  ) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE,
+    position = "center"
+  )
+```
+
+<a id="mySection022"></a>
+<font size="4">
+<B>
+Validation of the Tidy Dataset
+</B>
+</font>
+
+After the transformation, the tidy dataset was validated to confirm that the expected variables were present and that the reshaping process retained the country, date, vaccination metric, and reported value information.
+
+```{r}
+covid_summary <- covid_tidy %>%
+  summarise(
+    rows_after_tidying = n(),
+    countries = n_distinct(country),
+    metrics = n_distinct(metric),
+    date_min = min(date, na.rm = TRUE),
+    date_max = max(date, na.rm = TRUE)
+  )
+
+knitr::kable(
+  covid_summary,
+  caption = "Summary of COVID-19 Vaccination Data After Tidying",
+  col.names = c(
+    "Rows After Tidying",
+    "Number of Countries",
+    "Number of Metrics",
+    "Earliest Date",
+    "Latest Date"
+  )
+)
+```
+
+ The validation confirmed that the dataset was successfully transformed into a tidy structure. The resulting tidy dataset contained eight variables: `country`, `iso_code`, `date`, `vaccines`, `source_name`, `source_website`, `metric`, and `value`. The nine vaccination measures were converted from separate columns into the `metric` and `value` variables. This structure made the dataset easier to filter, group, summarize, compare, and visualize.
+ 
+<a id="mySection0022"></a>
+<font size="4">
+<B>
+Missing Value Handling
+</B>
+</font>
+
+Missing values are common in this dataset because countries reported different vaccination measures on different dates. Rather than imputing missing values, only rows where the reshaped value was missing were removed after the pivot_longer() transformation.
+
+```{r}
+covid_missing <- covid_raw %>%
+  mutate(date = as.Date(date)) %>%
+  pivot_longer(
+    cols = c(
+      total_vaccinations,
+      people_vaccinated,
+      people_fully_vaccinated,
+      daily_vaccinations_raw,
+      daily_vaccinations,
+      total_vaccinations_per_hundred,
+      people_vaccinated_per_hundred,
+      people_fully_vaccinated_per_hundred,
+      daily_vaccinations_per_million
+    ),
+    names_to = "metric",
+    values_to = "value"
+  )
+
+covid_missing %>%
+  summarise(
+    rows_before_removing_missing = n(),
+    missing_values = sum(is.na(value)),
+    rows_after_removing_missing = sum(!is.na(value))
+  )
+```
+
+The missing-value check identified 323,414 observations with missing values among the nine reshaped vaccination measures. These observations were excluded from the final tidy dataset using `filter(!is.na(value))`, leaving 455,194 non-missing observations. No missing values were imputed.
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+ Analysis and Visualization
+</B>
+</font>
+
+
+After the dataset was transformed into a tidy format, the analysis focused on examining vaccination progress across countries and over time. Summary statistics and visualizations were used to compare vaccination coverage and identify differences between countries.
+
+The analysis included:
+
+- Comparing vaccination coverage across countries<br>
+- Examining changes in vaccination progress over time<br>
+- Identifying countries with relatively higher or lower vaccination coverage<br>
+- Creating visualizations to highlight differences and trends in vaccination progress
+
+
+```{r}
+covid_latest_full <- covid_tidy %>%
+  filter(metric == "people fully vaccinated per hundred") %>%
+  group_by(country) %>%
+  slice_max(order_by = date, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(
+    country,
+    latest_date = date,
+    fully_vaccinated_per_hundred = value
+  ) %>%
+  filter(!is.na(fully_vaccinated_per_hundred)) %>%
+  arrange(desc(fully_vaccinated_per_hundred))
+
+covid_latest_full %>%
+  slice_head(n = 15) %>%
+  knitr::kable(
+    caption = "Top 15 Countries by Latest Fully Vaccinated per 100 People",
+    col.names = c(
+      "Country",
+      "Latest Date",
+      "Fully Vaccinated per 100 People"
+    ),
+    digits = 2,
+    align = "ccc",
+    format = "html"
+  ) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE,
+    position = "center"
+  )
+```
+
+The table above lists the countries with the highest latest reported values of people fully vaccinated per hundred. This provides a direct comparison of vaccination coverage across countries using the most recent available data.
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Vaccination Coverage Countries
+</B>
+</font> 
+
+
+The following bar chart visualizes the top 10 countries by latest fully vaccinated rate.
+
+```{r, fig.width=14, fig.height=7, out.width="100%"}
+covid_latest_full %>%
+  slice_head(n = 10) %>%
+  ggplot(aes(
+    x = reorder(country, fully_vaccinated_per_hundred),
+    y = fully_vaccinated_per_hundred
+  )) +
+  geom_col(fill = "#ADD8E6", width = 0.8) +
+  geom_text(
+    aes(label = round(fully_vaccinated_per_hundred, 1)),
+    hjust = 1.2,
+    color = "#000080",
+    size = 3.5
+  ) +
+  coord_flip() +
+  labs(
+    title = "Top 10 Countries by Full Vaccination Coverage",
+    x = "Country",
+    y = "Fully vaccinated per 100 people"
+  ) +
+  scale_y_continuous(labels = scales::label_number()) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      color = "#000080",
+      face = "bold",
+      size = 14
+    ),
+    axis.title = element_text(color = "#000080", face = "bold"),
+    axis.text = element_text(size = 10),
+    plot.margin = margin(10, 25, 10, 10)
+  )
+```
+
+This plot shows that the latest reported vaccination coverage varied substantially across countries. Gibraltar had the highest reported value in the table at approximately 122 fully vaccinated people per 100, followed by several countries with values above 90 per 100. Values above 100 should be interpreted cautiously because the measure is based on reported vaccination data and may reflect the source dataset's reporting conventions or differences between vaccination records and population estimates.
+
+<a id="mySectionb2b"></a>
+<font size="4">
+<B>
+Vaccination Progress Over Time
+</B>
+</font> 
+
+To examine vaccination progress over time, I also compare a small set of countries using the tidy dataset.
+
+```{r}
+selected_countries <- c("United States", "India", "United Kingdom", "Germany", "Brazil")
+
+covid_time_series <- covid_tidy %>%
+  filter(
+    metric == "people fully vaccinated per hundred",
+    country %in% selected_countries
+  )
+
+covid_time_series %>%
+  ggplot(aes(x = date, y = value, color = country)) +
+  geom_line(linewidth = 0.8) +
+  labs(
+    title = "Vaccination Progress Over Time",
+    subtitle = "People fully vaccinated per 100 people",
+    x = "Date",
+    y = "People fully vaccinated per 100",
+    color = "Country"
+  ) +
+  scale_y_continuous(labels = label_number())
+```
+
+<a id="mySection02"></a>
+<font size="4">
+<B>
+Dataset 2 — Renewable Energy Capacity Time Series
+</B>
+</font> 
+
+This dataset was used to examine renewable energy generation across different countries and energy sources. It contained information related to several types of renewable energy, including solar, wind, hydro, and other renewable technologies. The dataset provided an opportunity to examine differences in renewable energy production across countries and over time.
+
+<a id="mySectiond2"></a>
+<font size="4">
+<B>
+Data Source
+</B>
+</font>
+
+<br>
+Dataset: Renewable Power Plants / Renewable Capacity Time Series<br>
+Source: Kaggle<br>
+Link: <a href="https://www.kaggle.com/datasets/eugeniyosetrov/renewable-power-plants" target="_blank">Renewable Power Plants / Renewable Capacity Time Series</a>
+
+
+<a id="mySection21d"></a>
+<font size="4">
+<B>
+Data Loading and Initial Inspection
+</B>
+</font>
+
+```{r}
+renewable_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Project-2/Renewable-Energy-Capacity.csv"
+```
+
+<a id="mySection21e"></a>
+<font size="4">
+<B>
+Data Structure Before Tidying
+</B>
+</font>
+
+The dataset contained information organized across multiple columns, with different renewable energy sources and country-related information represented separately. Time-related information was also included to describe changes in energy generation over time.
+
+Because related information was distributed across multiple columns, the dataset required restructuring before it could be easily analyzed. The wide format made it more difficult to compare energy sources, countries, and time periods using standard R analysis and visualization functions.
+
+
+```{r}
+renewable_raw <- read_csv(renewable_url)
+
+dim(renewable_raw)
+names(renewable_raw)
+glimpse(renewable_raw)
+renewable_raw %>% slice_head(n = 10)
+```
+
+The original dataset is wide because the renewable generation variables are stored as separate columns such as `CH_solar_capacity`, `DE_wind_capacity`, and `FR_hydro_capacity`. In this structure, both the country and the renewable energy type are embedded in the column names rather than represented as separate variables.
+
+ 
+ 
+<a id="mySection21f"></a>
+<font size="4">
+<B>
+Tidy Data Transformation
+<br>
+</B>
+</font>
+ 
+The dataset was transformed from a wide format into a longer, tidy format. The transformation organized the data so that renewable energy type, country, time period, and generation value were represented as separate variables.
+
+The transformation used `pivot_longer()` from the `tidyr` package to combine related columns into appropriate variables. The resulting tidy dataset made it easier to group and summarize the data by country, energy source, and time period.
+
+The transformed dataset included variables such as:
+
+- `country`
+- `energy_type`
+- `time`
+- `generation`
+
+This structure provided a consistent format for further analysis and visualization.
+
+```{r}
+renewable_tidy <- renewable_raw %>%
+  mutate(day = as.Date(day)) %>%
+  pivot_longer(
+    cols = -day,
+    names_to = "country_energy",
+    values_to = "capacity"
+  ) %>%
+  extract(
+    country_energy,
+    into = c("country_code", "energy_type"),
+    regex = "^(.*?)_(.*)_capacity$",
+    remove = TRUE
+  ) %>%
+  rename_with(tolower) %>%
+  mutate(
+    energy_type = str_replace_all(energy_type, "_", " "),
+    country_code = str_to_upper(country_code)
+  ) %>%
+  filter(!is.na(capacity))
+
+glimpse(renewable_tidy)
+renewable_tidy %>% slice_head(n = 10)
+```
+
+<a id="mySection21g"></a>
+<font size="4">
+<B>
+Missing Value Handling
+<br>
+</B>
+</font>
+
+In this dataset, the main inconsistency was that country and energy type were encoded together in the original column names. This structure was normalized by extracting them into separate variables. Missing capacity values were removed after reshaping.
+
+The source dataset began at `1900-01-01`, and the date values were retained as provided in the original file to ensure that the transformation pipeline remained fully reproducible.
+
+```{r}
+renewable_tidy %>%
+  summarise(
+    rows_after_tidying = n(),
+    countries = n_distinct(country_code),
+    energy_types = n_distinct(energy_type),
+    start_date = min(day),
+    end_date = max(day)
+  )
+```
+
+<a id="mySection21h"></a>
+<font size="4">
+<B>
+Analysis and Visualization
+<br>
+</B>
+</font>
+
+The original discussion suggested comparing renewable energy output across energy sources, across countries, and over time. To address this, I summarize total capacity by energy type, total capacity by country, and then aggregate daily totals by energy type to examine long-run time trends.
+
+ 
+```{r}
+renewable_by_energy <- renewable_tidy %>%
+  group_by(energy_type) %>%
+  summarise(
+    total_capacity = sum(capacity, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_capacity))
+
+renewable_by_energy
+```
+
+<a id="mySection21m"></a>
+<font size="4">
+<B>
+Total Installed Renewable Energy Capacity
+<br>
+</B>
+</font>
+
+The summary table above compares total renewable capacity across energy types.
+
+```{r}
+renewable_by_energy %>%
+  ggplot(aes(
+    x = reorder(energy_type, total_capacity),
+    y = total_capacity
+  )) +
+  geom_col(fill = "lightblue") +
+  geom_text(
+    aes(label = scales::comma(round(total_capacity, 0), accuracy = 1)),
+    hjust = 1.05,
+    size = 3,
+    color = "black"
+  ) +
+  coord_flip() +
+  labs(
+    title = "Total Installed Renewable Energy Capacity by Source",
+    x = "Renewable Energy Source",
+    y = "Total Capacity"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_comma(accuracy = 1),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  theme_minimal()
+```
+
+This bar chart shows that wind related categories contribute the largest total capacity in the dataset. Solar and hydro also make large contributions, while geothermal and marine remain much smaller. This suggests that wind and solar are the dominant renewable technologies across the included countries.
+
+<a id="mySection21n"></a>
+<font size="4">
+<B>
+Total Renewable Energy Capacity
+<br>
+</B>
+</font>
+
+
+Next, I compare total renewable capacity across countries.
+
+```{r}
+# Summarize total renewable energy capacity by country
+renewable_by_country <- renewable_tidy %>%
+  group_by(country_code) %>%
+  summarise(
+    total_capacity = sum(capacity, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(total_capacity))
+
+# Display the summary table
+knitr::kable(
+  renewable_by_country,
+  caption = "Total Renewable Energy Capacity by Country",
+  digits = 0,
+  format.args = list(big.mark = ",")
+)
+
+# Plot total renewable energy capacity by country
+renewable_by_country %>%
+  ggplot(aes(
+    x = reorder(country_code, total_capacity),
+    y = total_capacity
+  )) +
+  geom_col(fill = "lightblue") +
+  geom_text(
+    aes(label = scales::comma(round(total_capacity, 0))),
+    hjust = 1.05,
+    size = 3,
+    color = "black"
+  ) +
+  coord_flip() +
+  labs(
+    title = "Total Renewable Energy Capacity by Country",
+    x = "Country Code",
+    y = "Total Capacity"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_comma(accuracy = 1),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  theme_minimal()
+```
+
+This chart shows that Germany has the highest total renewable capacity in the dataset, followed by major United Kingdom regions. Countries or regions such as Switzerland and Northern Ireland contribute much smaller totals. These differences likely reflect varying levels of investment, infrastructure, and national renewable energy policy.
+
+Finally, I examine how major renewable energy categories evolve over time.
+
+```{r}
+renewable_over_time <- renewable_tidy %>%
+  group_by(day, energy_type) %>%
+  summarise(
+    total_capacity = sum(capacity, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+renewable_over_time %>%
+  ggplot(aes(x = day, y = total_capacity, color = energy_type)) +
+  geom_line(linewidth = 0.7) +
+  labs(
+    title = "Renewable Capacity Over Time by Energy Type",
+    x = "Date",
+    y = "Total capacity",
+    color = "Energy type"
+  ) +
+  scale_y_continuous(labels = label_comma())
+```
+
+This time-series plot shows how renewable capacity changes over time for each energy type. Wind and solar show strong upward growth patterns, which suggests expanded adoption of these technologies over time. Hydropower remains more stable, likely because major hydro infrastructure changes more slowly once built.
+
+<a id="mySection21j"></a>
+<font size="4">
+<B>
+Interpretation and Key Findings
+<br>
+</B>
+</font>
+
+After tidying, the dataset made it possible to compare renewable capacity across countries and energy sources. The summary tables and plots showed which renewable technologies contributed the most total capacity, which countries had the largest totals, and how the overall capacity profile changed over time. The tidy structure made these comparisons much more direct than in the original wide format.
+
+<a id="mySection5a"></a>
+<font size="4">
+<B>
+Dataset 3 — GDP by Country (1960–2022)
+</B>
+</font>  
+
+This dataset was used to examine GDP trends across countries from 1960 through 2022. It contained GDP values for multiple countries, with annual values recorded for different years. The dataset provided an opportunity to demonstrate how time-based data could be transformed from a wide format into a tidy structure.
+ 
+<a id="mySection5b"></a>
+<font size="4">
+<B>
+Data Source
+</B>
+</font>  
+
+Dataset: World GDP by Country (1960–2022)<br>
+Source: Kaggle<br>
+Link: <a href="https://www.kaggle.com/datasets/annafabris/world-gdp-by-country-1960-2022" target="_blank">World GDP by Country (1960–2022)</a>
+<br>
+
+
+<a id="mySection5c"></a>
+<font size="4">
+<B>
+Data Loading and Initial Inspection
+</B>
+</font>
+
+```{r}
+gdp_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Project-2/World-GDP-Country.csv"
+```
+
+<a id="mySection5d"></a>
+<font size="4">
+<B>
+Data Structure Before Tidying
+</B>
+</font>
+
+```{r}
+gdp_raw <- read_csv(gdp_url)
+
+dim(gdp_raw)
+names(gdp_raw)
+gdp_raw %>%
+  slice_head(n = 15) %>%
+  select(Country, `Country Code`, `1960`:`1963`) %>%
+  knitr::kable(
+    caption = "First 15 Rows of GDP Data (1960–1963)",
+    digits = 0,
+    format.args = list(big.mark = ",")
+  )
+gdp_raw %>% slice_head(n = 10)
+```
+
+The GDP dataset is wide because each year is stored as a separate column. This means the variable `year` is embedded in the column names instead of being represented as its own column.
+
+<a id="mySection5e"></a>
+<font size="4">
+<B>
+Tidy Data Transformation
+</B>
+</font>
+
+The dataset was transformed from wide format into a tidy long format by combining the year columns into a single `year` variable and placing the corresponding GDP values into a `gdp` variable.
+
+The transformation was performed using the `pivot_longer()` function from the `tidyr` package.
+
+The resulting tidy dataset contained the following variables:
+
+- `country`
+- `year`
+- `gdp`
+
+This structure made it easier to filter, group, summarize, and visualize GDP data across countries and years.
+
+```{r}
+gdp_tidy <- gdp_raw %>%
+  pivot_longer(
+    cols = -c(`Country`, `Country Code`),
+    names_to = "year",
+    values_to = "gdp"
+  ) %>%
+  rename(
+    country = `Country`,
+    country_code = `Country Code`
+  ) %>%
+  rename_with(tolower) %>%
+  mutate(
+    year = as.integer(year)
+  ) %>%
+  filter(!is.na(gdp))
+
+glimpse(gdp_tidy)
+gdp_tidy %>% slice_head(n = 10)
+```
+
+<a id="mySection5f"></a>
+<font size="4">
+<B>
+Validation of the Tidy Dataset
+</B>
+</font>  
+
+The tidy GDP dataset was validated by checking its structure, column names, and data types. The number of rows and observations was reviewed to ensure that the data was reshaped correctly. Country names, year values, and GDP measurements were also checked for missing or invalid values. These checks helped confirm that the dataset was ready for further analysis and visualization.
+
+
+<a id="mySection5g"></a>
+<font size="4">
+<B>
+ Missing Value Handling
+</B>
+</font>   
+
+For this dataset, the main structural issue is that years are spread across columns. I normalize the dataset by reshaping those years into a single `year` variable. Missing GDP values are removed after reshaping.
+
+```{r}
+gdp_tidy %>%
+  summarise(
+    rows_after_tidying = n(),
+    countries = n_distinct(country),
+    min_year = min(year),
+    max_year = max(year)
+  )
+```
+
+
+<a id="mySection5h"></a>
+<font size="4">
+<B>
+Analysis and Visualization
+</B>
+</font>   
+  
+The original discussion focused on comparing GDP growth across countries and visualizing economic trends over time. To explore this, I selected five major economies, created a time-series visualization of their GDP trends, compared their average GDP values over the observed period, and calculated a long-term growth multiple using the first and last available GDP observations for each country.
+
+<a id="mySection5m"></a>
+<font size="4">
+<B>
+GDP Trends for Selected Countries
+</B>
+</font>
+
+
+```{r}
+gdp_selected <- gdp_tidy %>%
+  filter(country %in% c("United States", "China", "Japan", "Germany", "India"))
+
+gdp_selected %>%
+  ggplot(aes(x = year, y = gdp, color = country)) +
+  geom_line(linewidth = 0.8) +
+  labs(
+    title = "GDP Trends for Selected Countries",
+    x = "Year",
+    y = "GDP (current US$)",
+    color = "Country"
+  ) +
+  scale_y_continuous(labels = label_dollar(scale_cut = cut_short_scale()))
+```
+
+The line chart compares GDP trends across five major economies over time. The United States maintains the highest GDP throughout the period, while China experiences particularly rapid growth in the later decades. India also demonstrates a strong upward trend, starting from a lower GDP level. Overall, the chart illustrates differences in economic size and long-term growth patterns among the selected countries.
+
+<a id="mySection5n"></a>
+<font size="4">
+<B>
+Average GDP for Selected Countries
+</B>
+</font>
+
+Next, I calculate average GDP across the full period for selected countries.
+
+```{r}
+gdp_average <- gdp_selected %>%
+  group_by(country) %>%
+  summarise(
+    average_gdp = mean(gdp, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(average_gdp))
+
+gdp_average
+```
+
+The summary table above shows the average GDP of each selected country across the available years.
+
+```{r}
+gdp_average %>%
+  ggplot(aes(
+    x = reorder(country, average_gdp),
+    y = average_gdp
+  )) +
+  geom_col(fill = "lightblue") +
+  geom_text(
+    aes(label = label_dollar(scale_cut = cut_short_scale())(average_gdp)),
+    hjust = 1.05,
+    size = 3,
+    color = "black"
+  ) +
+  coord_flip() +
+  labs(
+    title = "Average GDP for Selected Countries",
+    x = "Country",
+    y = "Average GDP (current US$)"
+  ) +
+  scale_y_continuous(
+    labels = label_dollar(scale_cut = cut_short_scale()),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  theme_minimal()
+
+```
+
+The bar chart indicates that the United States had the highest average GDP over the period, followed by China and Japan. India had the lowest average GDP among the selected countries. This difference may reflect the timing of economic growth, as India’s more substantial expansion occurred in the later years of the dataset.
+
+To evaluate growth over time, I compare the first and last available GDP values for selected countries.
+
+```{r}
+gdp_growth <- gdp_selected %>%
+  group_by(country) %>%
+  summarise(
+    first_year = min(year),
+    last_year = max(year),
+    first_gdp = gdp[year == first_year][1],
+    last_gdp = gdp[year == last_year][1],
+    growth_multiple = last_gdp / first_gdp,
+    .groups = "drop"
+  ) %>%
+  arrange(desc(growth_multiple))
+
+knitr::kable(
+  gdp_growth,
+  caption = "GDP Growth Multiple by Country",
+  col.names = c(
+    "Country",
+    "First Year",
+    "Last Year",
+    "First GDP",
+    "Last GDP",
+    "Growth Multiple"
+  ),
+  digits = 2,
+  format.args = list(big.mark = ",")
+)
+```
+
+The table compares long-term GDP growth across selected countries by calculating the growth multiple between each country’s earliest and latest available GDP values. This comparison highlights the countries that experienced the largest proportional increases in GDP over the observed period.
+
+<a id="mySection5j"></a>
+<font size="4">
+<B>
+Interpretation and Key Findings
+</B>
+</font>   
+
+The tidy GDP dataset allows for easier comparison of economic trends across countries over time. The time-series graph illustrates differences in GDP levels and growth patterns, while the summary tables and bar chart provide insights into average GDP and long-term growth multiples. Overall, reshaping the original wide-format dataset into tidy format makes the data easier to analyze, visualize, and compare across countries.
+
+<a id="mySection0000"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>   
+
+This project demonstrated how wide-format datasets could be transformed into tidy datasets using R and the `tidyr` and `dplyr` packages. The three selected datasets—COVID-19 vaccination progress, renewable energy data, and world GDP data—had different structures, but each contained information that could be reorganized to support further analysis.
+
+Using transformations such as `pivot_longer()`, the datasets were converted into formats where variables were represented as columns and observations as rows. These transformations made it easier to filter, summarize, compare, and visualize the data using `dplyr` and `ggplot2`.
+
+Overall, this project provided practical experience working with real-world datasets and applying tidy data principles. It demonstrated how appropriate data transformations improved data organization, simplified analysis, and prepared the datasets for further exploration and visualization.
+
+</div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
+
