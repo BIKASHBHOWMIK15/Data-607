@@ -1,0 +1,97 @@
+---
+title: "Assignment 7 – HTML and JSON: Approach"
+author: "Bikash Bhowmik"
+date: "15-Oct-2026"
+output: html_document
+---
+
+## Project Overview
+
+This assignment explores two commonly used data formats, HTML and JSON, and how they can be used to organize and store information. The main objective is to understand the differences between these formats and learn how to import their data into R for further analysis.
+
+For this project, I will select three books related to Data Science and manually create two files containing the same information. The HTML file will present the book details in a table, while the JSON file will organize the information using key-value pairs and arrays. After creating both files, I will use R to read the data into separate data frames. Finally, I will compare the two data frames to verify that they contain the same information, even though the original files use different structures.
+
+
+## Book Selection and Data Attributes
+
+For this assignment, I chose three books related to data science and machine learning, which are closely connected to the topics covered in this course.
+
+The selected books are:
+
+1. **R for Data Science (2nd Edition)** – Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund
+2. **Python for Data Analysis (3rd Edition)** – Wes McKinney
+3. **An Introduction to Statistical Learning (2nd Edition)** – Gareth James, Daniela Witten, Trevor Hastie, and Robert Tibshirani
+
+These books provide a useful dataset for exploring HTML and JSON formats. Two of the selected books have multiple authors, meeting the assignment requirement.
+
+For each book, I will include five attributes: **title, authors, publication year, publisher, and subject**. The same information will be stored in both HTML and JSON files to compare how the two formats organize and represent data.
+
+------------------------------------------------------------------------
+
+## Planned Approach
+
+### 1. Creating the HTML Book Dataset
+
+I will manually create an HTML file named `books.html` to organize the information about the three selected books in a table format. The table will have a header row identifying the attributes, followed by three rows containing the details of each book. Each column will represent a specific attribute, including the book title, authors, publication year, publisher, and subject.
+
+Creating this file manually will help me better understand how HTML uses table elements, rows, and columns to display structured information on a web page.
+
+------------------------------------------------------------------------
+
+### 2. Creating the JSON Book Dataset
+
+I will manually create a JSON file named `books.json` containing the same information about the three selected books. The data will be organized as an array of objects, with each object representing one book. Each book object will include the same attributes used in the HTML table, such as title, authors, publication year, publisher, and subject.
+
+Unlike HTML, which displays information in rows and columns, JSON stores data using key-value pairs and arrays. Creating this file manually will help me understand how JSON organizes structured information and how the same dataset can be stored in different formats.
+
+------------------------------------------------------------------------
+
+### 3. Publishing the Data Files on GitHub
+
+After creating the HTML and JSON files, I will upload both `books.html` and `books.json` to a public GitHub repository. This will make the files accessible online and allow them to be used directly in R.
+
+By using the raw file URLs from GitHub, I will be able to import both datasets into R without depending on files stored on my local computer. This approach also makes the project easier to share and reproduce.
+
+------------------------------------------------------------------------
+
+### 4. Importing HTML Table Data into R
+
+I will use the `rvest` package in R to read the HTML file directly from its GitHub raw URL and extract the book information from the HTML table. After importing the data, I will convert it into an R data frame for further analysis.
+
+I will then examine the data frame to confirm that all three book records were imported correctly. I will also check the table structure, column names, and data types to ensure the information is organized properly and ready for comparison with the JSON dataset.
+
+------------------------------------------------------------------------
+
+### 5. Importing JSON Data into R
+
+I will use the `jsonlite` package in R to import the JSON file directly from its GitHub raw URL. After reading the file, I will convert the JSON data into an R data frame containing the information for all three selected books.
+
+I will review the imported data to ensure that the book titles, authors, publication years, publishers, and subject are correctly displayed. I will also check the column names, data types, and values to confirm that the JSON dataset contains the same information as the HTML table. This will help me understand how R processes JSON data and prepares it for further analysis.
+
+------------------------------------------------------------------------
+
+### 6. Compare the Two Data Frames
+
+After importing both the HTML and JSON files into R, I will compare the two data frames to determine whether they contain the same information. I will use the `identical()` function to check if both data frames are exactly the same, including their values, column names, and data types.
+
+I will also use the `all.equal()` function to identify any differences between the datasets, such as variations in data types or structure. If necessary, I will standardize the column formats before comparing them again. This process will help verify that both HTML and JSON files represent the same book dataset, even though they store the information in different formats.
+
+------------------------------------------------------------------------
+
+## R Packages and Tools
+
+The following packages will be used:
+
+-   `rvest` – to read HTML tables\
+-   `jsonlite` – to read JSON data\
+-   `dplyr` – for light data manipulation and comparison
+
+------------------------------------------------------------------------
+
+## Data Accessibility and Reproducibility
+
+To make this project reproducible, I will manually create both the HTML and JSON files and upload them to a public GitHub repository. This document will use GitHub raw file URLs to import the datasets directly into R instead of relying on files stored on my local computer.
+
+This approach will allow others to access the same datasets and run the analysis without needing to download the files manually. It will also make the project easier to share, verify, and reproduce.
+
+------------------------------------------------------------------------
