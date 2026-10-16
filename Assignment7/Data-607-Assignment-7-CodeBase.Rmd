@@ -125,6 +125,12 @@ library(jsonlite)
 library(tidyverse)
 ```
 
+Loaded library 
+<br>
+<b>library(rvest)<br>
+library(jsonlite)<br>
+library(tidyverse)<br> </b>
+
 
 ```{r}
 html_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment7/books.html"
