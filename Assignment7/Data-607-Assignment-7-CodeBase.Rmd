@@ -1,0 +1,442 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607-Assignment 7 – HTML and JSON: CodeBase</B></h1>
+  <h3><B>Bikash Bhowmik ---- 17-Oct-2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 15pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Introduction</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >Book Selection and Data Attributes</a>
+<br>
+<a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Creating the HTML Book Dataset</a>
+<br>
+<a href="#mySection21" style="font-size: 1em; font-weight: bold;" >Creating the JSON Book Dataset</a>
+<br>
+<a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Inspect structure of both data frames</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Standardize data types</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Final Output</a>
+<br>
+<a href="#mySection85" style="font-size: 1em;font-weight: bold; " >HTML vs. JSON</a>
+<br>
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Introduction
+</B>
+</font>
+
+This assignment explored two commonly used data formats, HTML and JSON, and how they were used to organize and store information. The main objective was to understand the differences between these formats and learn how to import their data into R for further analysis.
+
+For this project, I selected three books related to Data Science and manually created two files containing the same information. The HTML file presented the book details in a table, while the JSON file organized the information using key-value pairs and arrays. After creating both files, I used R to read the data into separate data frames. Finally, I compared the two data frames to verify that they contained the same information, even though the original files used different structures.
+
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+Book Selection and Data Attributes
+</B>
+</font>
+
+For this assignment, I chose three books related to data science and machine learning, which were closely connected to the topics covered in this course.
+
+The selected books were:
+
+1. **R for Data Science (2nd Edition)** – Hadley Wickham, Mine Çetinkaya-Rundel, and Garrett Grolemund
+2. **Python for Data Analysis (3rd Edition)** – Wes McKinney
+3. **An Introduction to Statistical Learning (2nd Edition)** – Gareth James, Daniela Witten, Trevor Hastie, and Robert Tibshirani
+
+These books provided a useful dataset for exploring HTML and JSON formats. Two of the selected books had multiple authors, which satisfied the assignment requirement.
+
+For each book, I included five attributes: **title, authors, publication year, publisher, and subject**. The same information was stored in both HTML and JSON files to compare how the two formats organized and represented data.
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Creating the HTML File (`books.html`)
+</B>
+</font>
+
+I manually created an HTML file named `books.html` to organize the information about the three selected books in a table format. The table contained a header row identifying the attributes, followed by three rows containing the details of each book. Each column represented a specific attribute, including the book title, authors, publication year, publisher, and subject.
+
+Creating this file manually helped me better understand how HTML used table elements, rows, and columns to display structured information on a web page.
+
+The HTML file was uploaded to GitHub and accessed in R using its raw GitHub URL.
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(rvest)
+library(jsonlite)
+library(tidyverse)
+```
+
+
+```{r}
+html_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment7/books.html"
+
+books_html <- html_url %>%
+  read_html() %>%
+  html_table(fill = TRUE)
+
+books_html <- books_html[[1]]
+
+books_html
+```
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+Creating the JSON File (`books.json`)
+</B>
+</font>
+
+I manually created a JSON file named `books.json` containing the same information about the three selected books. The data was organized as an array of objects, with each object representing one book. Each book object included the same attributes used in the HTML table, such as title, authors, publication year, publisher, and subject.
+
+Unlike HTML, which displayed information in rows and columns, JSON stored data using key-value pairs and arrays. Creating this file manually helped me understand how JSON organized structured information and how the same dataset could be stored in different formats.
+
+```{r}
+json_url <- "https://raw.githubusercontent.com/BIKASHBHOWMIK15/Data-607/main/Assignment7/books.json"
+
+books_json <- fromJSON(json_url)
+
+books_json
+```
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Inspect structure of both data frames
+</B>
+</font>
+
+Before comparing the two datasets, I inspect their structure to verify the variable names and data types.
+
+
+```{r}
+glimpse(books_html)
+
+glimpse(books_json)
+```
+
+This step helps confirm whether both imported datasets have the same variables and whether any columns require type conversion before comparison.
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Standardize data types
+</B>
+</font>
+
+Because HTML and JSON imports can sometimes differ slightly in structure, I standardize both data frames by converting all columns to character type, matching column names and order, and resetting row names.
+
+```{r}
+# Compare HTML and JSON datasets
+
+# Standardize column names
+clean_names <- function(x) {
+  x <- tolower(trimws(x))
+  x <- gsub("[^a-z0-9]+", "_", x)
+  x <- gsub("^_|_$", "", x)
+  x
+}
+
+names(books_html) <- clean_names(names(books_html))
+names(books_json) <- clean_names(names(books_json))
+
+# Expected fields
+expected_cols <- c(
+  "title", "authors", "publication_year",
+  "publisher", "subject"
+)
+
+# Display imported column names
+cat("HTML columns:\n")
+print(names(books_html))
+
+cat("JSON columns:\n")
+print(names(books_json))
+
+# Check that both datasets contain the required fields
+missing_html <- setdiff(expected_cols, names(books_html))
+missing_json <- setdiff(expected_cols, names(books_json))
+
+if (length(missing_html) > 0 || length(missing_json) > 0) {
+  cat("Missing HTML columns:", paste(missing_html, collapse = ", "), "\n")
+  cat("Missing JSON columns:", paste(missing_json, collapse = ", "), "\n")
+  stop("Column mismatch: check the imported datasets.")
+}
+
+# Select matching columns
+html_compare <- books_html[, expected_cols, drop = FALSE]
+json_compare <- books_json[, expected_cols, drop = FALSE]
+
+# Convert author arrays to comma-separated text
+normalize_authors <- function(x) {
+  if (is.list(x)) {
+    x <- vapply(
+      x,
+      function(a) paste(unlist(a), collapse = ", "),
+      character(1)
+    )
+  }
+
+  gsub("\\s+", " ", trimws(as.character(x)))
+}
+
+html_compare$authors <- normalize_authors(html_compare$authors)
+json_compare$authors <- normalize_authors(json_compare$authors)
+
+# Standardize remaining fields
+for (col in c("title", "publisher", "subject")) {
+  html_compare[[col]] <- trimws(as.character(html_compare[[col]]))
+  json_compare[[col]] <- trimws(as.character(json_compare[[col]]))
+}
+
+html_compare$publication_year <- as.numeric(
+  html_compare$publication_year
+)
+
+json_compare$publication_year <- as.numeric(
+  json_compare$publication_year
+)
+
+# Compare the two datasets
+comparison_result <- all.equal(
+  html_compare,
+  json_compare,
+  check.attributes = FALSE
+)
+
+cat("\nComparison result:\n")
+print(comparison_result)
+
+# Display both datasets
+knitr::kable(
+  html_compare,
+  caption = "Books Imported from HTML"
+)
+
+knitr::kable(
+  json_compare,
+  caption = "Books Imported from JSON"
+)
+```
+
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Final Output
+</B>
+</font>
+
+After this step, both data frames are aligned for a strict comparison.
+
+Compare the two data frames using identical()
+The identical() function checks whether the two data frames are exactly the same in both values and structure.
+
+```{r}
+# Convert both objects to standard data frames
+html_compare <- as.data.frame(html_compare)
+json_compare <- as.data.frame(json_compare)
+
+
+# Check the structure of both datasets
+str(html_compare)
+str(json_compare)
+
+# Check column data types
+sapply(html_compare, typeof)
+sapply(json_compare, typeof)
+
+# Check row names
+rownames(html_compare)
+rownames(json_compare)
+
+
+identical_result <- identical(html_compare, json_compare)
+
+cat("Are the standardized datasets identical? ",
+    identical_result, "\n")
+```
+
+If the result is TRUE, then both the HTML and JSON files produce exactly the same data frame in R.
+
+Compare the two data frames using all.equal()
+To provide an additional check, I also use all.equal(), which is slightly more flexible and can help identify minor structural differences if they exist.
+
+```{r}
+# Compare standardized datasets using all.equal()
+all_equal_result <- all.equal(
+  html_compare,
+  json_compare,
+  check.attributes = FALSE
+)
+
+cat("Are the standardized datasets equivalent? ",
+    isTRUE(all_equal_result), "\n")
+
+# Display comparison details
+print(all_equal_result)
+```
+
+If the result returned TRUE, it confirmed that the two imported datasets were equivalent.
+
+Display final combined comparison view
+To make the comparison more transparent, I print both data frames again after type alignment.
+
+```{r}
+knitr::kable(
+  html_compare,
+  format = "html",
+  caption = "Book Data Imported from HTML",
+  row.names = FALSE,
+  align = c("l", "l", "c", "l", "l")
+)
+
+knitr::kable(
+  json_compare,
+  format = "html",
+  caption = "Book Data Imported from JSON",
+  row.names = FALSE,
+  align = c("l", "l", "c", "l", "l")
+)
+```
+
+These tables show that both source files contain the same book information after being imported into R.
+
+
+<a id="mySection85"></a>
+<font size="4">
+<B>
+HTML vs. JSON
+</B>
+</font>  
+
+| Feature | HTML | JSON |
+|---|---|---|
+| Full name | HyperText Markup Language | JavaScript Object Notation |
+| Main purpose | Display content on web pages | Store and exchange structured data |
+| Structure | Tags such as `<table>`, `<tr>`, and `<td>` | Objects `{}` and arrays `[]` |
+| Human readability | Readable, but contains many tags | Generally concise and easy to read |
+| Data types | Table cells are usually extracted as text | Supports strings, numbers, booleans, arrays, objects, and null |
+| Data extraction in R | `rvest` | `jsonlite` |
+| Common applications | Websites and web tables | Web APIs, application integration, and data exchange |
+| Best suited for | Presenting information to users | Transferring structured data between systems |
+
+<a id="mySection86"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>  
+
+This assignment demonstrated how the same dataset could be represented in both HTML and JSON formats and then imported into R for comparison. The HTML file stored the data in a table, while the JSON file stored the same information in a structured object format.
+
+After loading both files into R and standardizing their structures, both `identical()` and `all.equal()` returned `TRUE`, confirming that the two formats produced the same final data frame. This exercise helped reinforce my understanding of the structural differences between HTML and JSON while demonstrating that both formats could serve as valid data sources for downstream analysis in R.
+
+
+<br>
+<br>
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
