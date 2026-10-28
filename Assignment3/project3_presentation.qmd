@@ -12,24 +12,23 @@ format:
     transition: fade
     footer: "Project 3 | Energy Team"
     code-fold: false
+    include-in-header:
+      text: |
+        <style>
+        .reveal .mermaid,
+        .reveal .cell-output-display {
+          text-align: center;
+        }
+        .reveal .mermaid svg,
+        .reveal .cell-output-display svg {
+          max-height: 560px;
+        }
+        .reveal h2 {
+          font-size: 1em;
+        }
+        </style>
 editor: visual
 ---
-
-```{=html}
-<style>
-.reveal .mermaid,
-.reveal .cell-output-display {
-  text-align: center;
-}
-.reveal .mermaid svg,
-.reveal .cell-output-display svg {
-  max-height: 560px;
-}
-.reveal h2 {
-  font-size: 1em;
-}
-</style>
-```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
@@ -74,7 +73,7 @@ combined_data <- daily_load %>%
 ```
 
 
-## Data Sources (ELLIE) {.smaller}
+## Data Sources {.smaller}
 
 - **NYISO** 5-minute load data (NYC and Long Island zones)
 - **NOAA / NWS** daily weather: temperature and precipitation
@@ -115,7 +114,7 @@ daily_weather {
 }
 ```
 
-## NYISO Load Data (Cecilia) {.smaller}
+## NYISO Load Data {.smaller}
 
 **What I accomplished:**
 
@@ -131,7 +130,7 @@ daily_weather {
 
 Output: nyiso_daily_average_load.csv
 
-## NYISO Code Base 1 (Cecilia) {.smaller}
+## NYISO Code Base 1 {.smaller}
 
 1\. `map_dfr()` — Automate and combine
 
@@ -149,7 +148,7 @@ all_data <- map_dfr(months, function(month) {
 
 - Avoids having to download, open, and merge every file manually.
 
-## NYISO Code Base 2 (Cecilia) {.smaller}
+## NYISO Code Base 2 {.smaller}
 
 2\. `group_by()` + `summarise()` — Calculate daily averages
 
@@ -167,7 +166,7 @@ group_by(Date, Name, PTID) |>
 
 - Produces one daily average per date and zone represented in the data.
 
-## NOAA Weather Data Collection (BIKASH) {.smaller}
+## NOAA Weather Data Collection {.smaller}
 
 **Source:** National Oceanic and Atmospheric Administration (NOAA)
 
@@ -181,7 +180,7 @@ group_by(Date, Name, PTID) |>
 Hello everyone. My name is Bikash Bhowmik, and my contribution to our project focused on NOAA weather data. NOAA stands for the National Oceanic and Atmospheric Administration. Our objective was to examine how temperature and weather conditions relate to electricity demand in New York. We selected three weather stations: LaGuardia Airport, Central Park, and Islip. These stations represent different locations in the New York region and help us understand regional temperature differences. The weather data provides important information for our electricity demand analysis.
 :::
 
-## NOAA Data Cleaning and Preparation (BIKASH) {.smaller}
+## NOAA Data Cleaning and Preparation {.smaller}
 
 **Weather data processing in R**
 
@@ -195,7 +194,7 @@ Hello everyone. My name is Bikash Bhowmik, and my contribution to our project fo
 After collecting the NOAA weather data, we prepared it for analysis using R. We focused on daily temperature observations, checked for missing values, and organized the dates. We also considered Heating Degree Days, or HDD, and Cooling Degree Days, or CDD. Both measurements use 65 degrees Fahrenheit as a reference temperature. HDD measures how far temperatures fall below 65 degrees, while CDD measures how far temperatures rise above 65 degrees. These variables help us understand potential heating and cooling requirements.
 :::
 
-## Weather and Electricity Demand (BIKASH) {.smaller}
+## Weather and Electricity Demand {.smaller}
 
 ::::: columns
 ::: {.column width="50%"}
@@ -220,7 +219,7 @@ The main purpose of using NOAA weather data was to investigate how temperature r
 :::
 
 
-## Electricity Load Over Time (ZAINA) {.smaller}
+## Electricity Load Over Time {.smaller}
 
 ```{r}
 #| fig-height: 4.6
@@ -234,22 +233,32 @@ ggplot(combined_data, aes(DATE, Daily_Average_Load, color = Zone)) +
 - Clear **summer peaks** in both regions
 - NYC averages about **5,655 MW** vs. **2,291 MW** for Long Island
 
-## Temperature vs. Load (ZAINA) {.smaller}
+## Seasonal Demand {.smaller}
 
 ```{r}
 #| fig-height: 4.6
 #| fig-width: 10
-ggplot(combined_data, aes(TAVG, Daily_Average_Load)) +
-  geom_point(alpha = 0.25, color = "steelblue") +
-  geom_smooth(method = "loess", se = FALSE, color = "darkred", linewidth = 1) +
-  facet_wrap(~ Zone, scales = "free_y") +
-  labs(x = "Average daily temperature (°F)", y = "Daily average load (MW)") +
-  theme_minimal(base_size = 14)
+combined_data %>%
+  mutate(Season = case_when(
+    lubridate::month(DATE) %in% c(12, 1, 2) ~ "Winter",
+    lubridate::month(DATE) %in% c(3, 4, 5) ~ "Spring",
+    lubridate::month(DATE) %in% c(6, 7, 8) ~ "Summer",
+    TRUE ~ "Fall"),
+    Season = factor(Season, levels = c("Winter", "Spring", "Summer", "Fall"))) %>%
+  group_by(Zone, Season) %>%
+  summarise(Average_Load = mean(Daily_Average_Load), .groups = "drop") %>%
+  ggplot(aes(Season, Average_Load, fill = Zone)) +
+  geom_col(position = "dodge", width = 0.7) +
+  labs(x = NULL, y = "Average load (MW)", fill = "Region") +
+  theme_minimal(base_size = 14) +
+  theme(panel.grid.major.x = element_blank())
 ```
 
-**U-shaped:** Electricity load decreases as temperatures approach 55–60°F, then increases sharply as temperatures rise further.
+Summer is highest, then winter, fall, spring, in both regions
 
-## Heating and Cooling Degree Days (ZAINA) {.smaller}
+
+
+## Heating and Cooling Degree Days {.smaller}
 
 ```{r}
 #| fig-height: 4.8
@@ -273,49 +282,9 @@ combined_data %>%
 
 Electricity load increases steadily with cooling degree days in both NYC and Long Island, while heating degree days show a weaker pattern. This comparison highlights and helps explain the higher loads observed during summer.
 
-## Seasonal Demand (ZAINA) {.smaller}
 
-```{r}
-#| fig-height: 4.6
-#| fig-width: 10
-combined_data %>%
-  mutate(Season = case_when(
-    lubridate::month(DATE) %in% c(12, 1, 2) ~ "Winter",
-    lubridate::month(DATE) %in% c(3, 4, 5) ~ "Spring",
-    lubridate::month(DATE) %in% c(6, 7, 8) ~ "Summer",
-    TRUE ~ "Fall"),
-    Season = factor(Season, levels = c("Winter", "Spring", "Summer", "Fall"))) %>%
-  group_by(Zone, Season) %>%
-  summarise(Average_Load = mean(Daily_Average_Load), .groups = "drop") %>%
-  ggplot(aes(Season, Average_Load, fill = Zone)) +
-  geom_col(position = "dodge", width = 0.7) +
-  labs(x = NULL, y = "Average load (MW)", fill = "Region") +
-  theme_minimal(base_size = 14) +
-  theme(panel.grid.major.x = element_blank())
-```
 
-Summer is highest, then winter, fall, spring, in both regions
-
-## Precipitation Matters Little (ZAINA) {.smaller}
-
-```{r}
-#| fig-height: 4.4
-#| fig-width: 10
-combined_data %>%
-  mutate(Rain = if_else(PRCP > 0, "Rainy", "Dry")) %>%
-  group_by(Zone, Rain) %>%
-  summarise(Average_Load = mean(Daily_Average_Load), .groups = "drop") %>%
-  ggplot(aes(Rain, Average_Load, fill = Rain)) +
-  geom_col(width = 0.6) +
-  facet_wrap(~ Zone, scales = "free_y") +
-  labs(x = NULL, y = "Average load (MW)") +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "none")
-```
-
-Dry and rainy days look nearly the same
-
-## Correlations with Daily Load (ZAINA) {.smaller}
+## Correlations with Daily Load {.smaller}
 
 | Weather variable    | Long Island | NYC       |
 |---------------------|-------------|-----------|
@@ -326,7 +295,7 @@ Dry and rainy days look nearly the same
 - Cooling demand has by far the strongest linear link to load
 - Negative HDD correlation reflects the much larger summer peaks, not an absence of winter demand
 
-## Key Takeaways (ZAINA) {.smaller}
+## Key Takeaways {.smaller}
 
 - ::: {}
   Heat is the strongest weather-related indicator of electricity demand.
@@ -340,7 +309,7 @@ Dry and rainy days look nearly the same
 
   - **Regional patterns:** NYC has higher overall load, but both regions respond similarly to temperature.
 
-## Limitations and Next Steps (ZAINA) {.smaller}
+## Limitations and Next  Steps {.smaller}
 
 ::::: columns
 ::: {.column width="50%"}
