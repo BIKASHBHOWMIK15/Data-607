@@ -1,0 +1,88 @@
+---
+title: "Assignment 9 – Using a New York Times API in R: Approach"
+author: "Bikash Bhowmik"
+date: "29-Oct-2026"
+output: html_document
+fontsize: 13pt
+---
+
+## Project Overview
+
+The purpose of this assignment is to work with a public New York Times API using R. I will retrieve data through an API request, process the JSON response, and organize the information into a tidy data frame for analysis.
+
+For this assignment, I selected the <B> New York Times Most Popular API</B>, which provides information about articles that receive the most views, shares, or emails during a specific period. I chose this API because it provides structured article information that can be easily processed and analyzed using R.
+
+My main research question is:
+
+<B>Which sections of The New York Times have the most articles appearing on the most-viewed list during the past seven days?</B>
+
+
+## API Overview
+
+I selected the **New York Times Most Popular API**, which provides information about the most-viewed articles over a specified period.
+
+**API Endpoint:**
+
+`/svc/mostpopular/v2/viewed/7.json`
+
+**API Base URL:**
+
+`https://api.nytimes.com`
+
+**Request Parameters:**
+
+- `period = 7`: Retrieves articles from the seven-day most-viewed list.
+- `api-key`: Authenticates the API request.
+
+The API returns article information in JSON format, including article titles, sections, publication dates, and other metadata.
+
+An API key is required to access the data. For security, I will store my key in an environment variable and retrieve it in R using `Sys.getenv("NYT_API_KEY")` instead of including it directly in the code.
+
+This approach protects the API key and allows the R code to be shared without exposing authentication credentials.
+
+## Methodology
+
+I plan to complete the assignment using the following steps:
+
+- <B>Load R packages:</B> Use httr, jsonlite, dplyr, and other tidyverse packages needed to retrieve and process the data.
+
+- <B>Access the API key:</B> Retrieve the stored API key using Sys.getenv("NYT_API_KEY").
+
+- <B>Request data:</B> Send a GET request to the New York Times Most Popular API.
+
+- <B>Read the JSON response:</B> Convert the returned JSON data into an R object.
+
+- <B>Extract article information:</B> Identify the results portion of the response, which contains the article records.
+
+- <B>Create a tidy data frame:</B> Convert the extracted information into a tibble.
+
+- <B>Select useful variables:</B> Keep columns such as article title, section, subsection, publication date, and article URL.
+
+- <B>Analyze the results:</B> Group articles by section and count how many articles appear in each category.
+
+- <B>Present findings:</B> Display a summary table showing which sections have the highest number of articles on the most-viewed list.
+
+
+## Data Cleaning and Preparation
+
+Before analyzing the data, I will review the returned information to identify any missing values, unnecessary columns, or formatting issues.
+
+Some articles may not have a subsection or other optional information. I will keep these missing values as NA unless a specific adjustment is necessary.
+
+The API response may also contain nested information, such as multimedia details. Since my analysis focuses on article sections, I will exclude these fields from the main data frame.
+
+I will also convert publication dates into the correct R date format so they can be used in future analysis if needed.
+
+Finally, I will select only the variables relevant to my research question. Each row in the final data frame will represent one article, and each column will represent a specific article attribute.
+
+## Anticipated Results
+
+By completing this assignment, I expect to develop a reproducible R workflow that retrieves data from the New York Times Most Popular API and converts the JSON response into a clean, organized data frame.
+
+I will then summarize the articles by news section to identify which sections appear most frequently among the most-viewed articles during the seven-day period.
+
+This analysis will help me practice working with APIs, handling JSON data, cleaning datasets, and performing basic exploratory analysis using R.
+
+The results will describe the distribution of articles in the API's most-viewed list rather than measure the total readership of each news section.
+
+<br><br><br><br>
