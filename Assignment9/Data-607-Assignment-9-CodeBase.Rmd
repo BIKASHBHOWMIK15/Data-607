@@ -1,0 +1,444 @@
+---
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    #theme: flatly
+---
+
+
+<div>
+<div style="text-align:center;"> 
+  <h1><B>DATA 607-Assignment 9 – Using a New York Times API in R: CodeBase</B></h1>
+  <h3><B>Bikash Bhowmik ---- 17-Oct-2026</B></h3> 
+</div>
+
+</div>
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+body {
+  font-size: 15pt;
+}
+</style>
+
+
+
+<!-- Include Split.js library -->
+<script src="https://unpkg.com/split.js/dist/split.min.js"></script>
+
+<div id="split-container" style="height: 100vh; display: flex; flex-direction: row;">
+
+  <!-- Left column -->
+  <div id="left-panel" style="width:150px; overflow:auto; background:#f8f9fa; padding:10px;">
+
+### 
+<a href="#mySection1" style="font-size: 1em; font-weight: bold;" >Project Overview</a>
+<br>
+<a href="#mySection2" style="font-size: 1em; font-weight: bold;" >API Overview and Request</a>
+<br>
+<a href="#mySection20" style="font-size: 1em; font-weight: bold;" >Methodology</a>
+<br>
+<a href="#mySection21" style="font-size: 1em; font-weight: bold;" >Data Retrieval and JSON Processing</a>
+<br>
+<a href="#mySection210" style="font-size: 1em; font-weight: bold;" >Data Inspection and Transformation</a>
+<br>
+<a href="#mySection22" style="font-size: 1em; font-weight: bold;" >Data Cleaning</a>
+<br>
+<a href="#mySection2a" style="font-size: 1em; font-weight: bold;" >Analysis: Articles by Section</a>
+<br>
+<a href="#mySection2b" style="font-size: 1em; font-weight: bold;" >Visualization Interpretation</a>
+<br>
+<a href="#mySection85" style="font-size: 1em;font-weight: bold; " >Results</a>
+<br>
+<a href="#mySection86" style="font-size: 1em;font-weight: bold; " >Conclusion</a>
+<br>
+ </div>
+ 
+
+  <!-- Right column -->
+  <div id="right-panel" style="flex-grow:1; overflow:auto; padding:10px;">
+  
+<a id="mySection1"></a>
+<font size="4">
+<B>
+Project Overview
+</B>
+</font>
+
+The purpose of this assignment is to work with a public New York Times API using R. I will retrieve data through an API request, process the JSON response, and organize the information into a tidy data frame for analysis.
+
+For this assignment, I selected the <B> New York Times Most Popular API</B>, which provides information about articles that receive the most views, shares, or emails during a specific period. I chose this API because it provides structured article information that can be easily processed and analyzed using R.
+
+My main research question is:
+
+<B>Which sections of The New York Times have the most articles appearing on the most-viewed list during the past seven days?</B>
+
+<a id="mySection2"></a>
+<font size="4">
+<B>
+API Overview and Request
+</B>
+</font>
+
+I selected the **New York Times Most Popular API**, which provides information about the most-viewed articles over a specified period.
+
+**API Endpoint:**
+
+`/svc/mostpopular/v2/viewed/7.json`
+
+**API Base URL:**
+
+`https://api.nytimes.com`
+
+**Request Parameters:**
+
+- `period = 7`: Retrieves articles from the seven-day most-viewed list.
+- `api-key`: Authenticates the API request.
+
+The API returns article information in JSON format, including article titles, sections, publication dates, and other metadata.
+
+An API key is required to access the data. For security, I will store my key in an environment variable and retrieve it in R using `Sys.getenv("NYT_API_KEY")` instead of including it directly in the code.
+
+This approach protects the API key and allows the R code to be shared without exposing authentication credentials.
+
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(kableExtra)
+```
+
+**Loaded library **
+<br>
+<b>library(httr)<br>
+library(jsonlite)<br>
+library(tidyverse)<br> 
+library(kableExtra)<br> </b>
+
+**Verify API Key in environment variable**
+
+```{r}
+api_key <- Sys.getenv("NYT_API_KEY")
+
+if (api_key == "") {
+  stop("NYT_API_KEY not found. Please store your API key in an environment variable.")
+} else {
+  cat("NYT API key found!")
+}
+```
+
+**Make API Request **
+
+```{r}
+base_url <- "https://api.nytimes.com/svc/mostpopular/v2/viewed/7.json"
+
+response <- GET(
+  url = base_url,
+  query = list(`api-key` = api_key)
+)
+
+stop_for_status(response)
+
+cat("NYT API request completed successfully!\n")
+cat("HTTP Status Code:", status_code(response), "\n")
+```
+
+
+<a id="mySection20"></a>
+<font size="4">
+<B>
+Methodology
+</B>
+</font>
+
+I plan to complete the assignment using the following steps:
+
+- <B>Load R packages:</B> Use httr, jsonlite, dplyr, and other tidyverse packages needed to retrieve and process the data.
+
+- <B>Access the API key:</B> Retrieve the stored API key using Sys.getenv("NYT_API_KEY").
+
+- <B>Request data:</B> Send a GET request to the New York Times Most Popular API.
+
+- <B>Read the JSON response:</B> Convert the returned JSON data into an R object.
+
+- <B>Extract article information:</B> Identify the results portion of the response, which contains the article records.
+
+- <B>Create a tidy data frame:</B> Convert the extracted information into a tibble.
+
+- <B>Select useful variables:</B> Keep columns such as article title, section, subsection, publication date, and article URL.
+
+- <B>Analyze the results:</B> Group articles by section and count how many articles appear in each category.
+
+- <B>Present findings:</B> Display a summary table showing which sections have the highest number of articles on the most-viewed list.
+
+
+<a id="mySection21"></a>
+<font size="4">
+<B>
+API Data Parse/Inspect/Transform
+</B>
+</font>
+
+**Parse JSON Response**
+
+```{r}
+nyt_text <- content(response, as = "text", encoding = "UTF-8")
+nyt_json <- fromJSON(nyt_text, flatten = TRUE)
+```
+
+**Inspect Response Structure**
+
+```{r}
+names(nyt_json)
+nyt_json$status
+nyt_json$num_results
+```
+
+**Convert Results to a Tidy Data Frame**
+
+```{r}
+nyt_df <- as_tibble(nyt_json$results) %>%
+  select(
+    url,
+    section,
+    subsection,
+    byline,
+    type,
+    title,
+    abstract,
+    published_date,
+    source,
+    asset_id,
+    updated,
+    nytdsection,
+    adx_keywords
+  ) %>%
+  mutate(
+    published_date = as.Date(published_date),
+    updated = as.POSIXct(updated, format = "%Y-%m-%d %H:%M:%S"),
+    subsection = na_if(subsection, "")
+  )
+```
+
+<a id="mySection210"></a>
+<font size="4">
+<B>
+Data Inspection and Transformation
+</B>
+</font>
+
+**Inspecting Data**
+
+```{r}
+glimpse(nyt_df)
+section_counts <- nyt_df %>%
+  count(section, sort = TRUE)
+
+section_counts
+```
+
+**Tidy Data Frame**
+
+Full dataset contains 20 records, below is showing 5 records 
+
+```{r}
+knitr::kable(
+  head(nyt_df, 5),
+  caption = "New York Times Most-Viewed Articles",
+  format = "html",
+  escape = TRUE
+) %>%
+  column_spec(1, width = "10em")
+```
+
+**Check Missing Values**
+
+```{r}
+nyt_df %>%
+  summarise(
+    missing_subsection = sum(is.na(subsection)),
+    missing_byline = sum(is.na(byline)),
+    missing_abstract = sum(is.na(abstract))
+  )
+```
+
+The missing-value analysis found 9 missing values in the `subsection` column. The `byline` and `abstract` columns had no missing values. This indicates that the dataset is largely complete for these three variables.
+
+<a id="mySection22"></a>
+<font size="4">
+<B>
+Data Cleaning
+</B>
+</font>
+
+
+Several data-cleaning steps were performed to prepare the New York Times API response for analysis.
+
+- **API authentication:** The API key was accessed through the `NYT_API_KEY` environment variable to avoid exposing sensitive credentials in the code.
+- **JSON processing:** The API response was converted into an R object, and the `results` component was extracted to obtain the article-level data.
+- **Variable selection:** Relevant fields, including article title, section, subsection, publication date, author information, and URL, were retained for analysis.
+- **Data type conversion:** The `published_date` variable was converted to R's date format to support consistent date handling.
+- **Missing value handling:** Empty strings in the `subsection` column were replaced with `NA` so that missing information could be identified more easily.
+- **Data simplification:** Unnecessary nested information, such as multimedia metadata, was excluded to keep the dataset focused on the research question.
+
+These steps produced a structured tibble that was easier to inspect, summarize, and visualize. The cleaned data was then used to count articles by section and identify which sections appeared most frequently in the API results.
+
+<a id="mySection2a"></a>
+<font size="4">
+<B>
+Analysis: Articles by Section
+</B>
+</font>
+
+<B>  Articles by Section </B> 
+
+```{r}
+section_counts <- nyt_df %>%
+  count(section, sort = TRUE)
+
+section_counts
+```
+
+<B> Top 7 Sections </B> 
+
+```{r}
+top_7_sections <- section_counts %>%
+  slice_head(n = 7)
+
+knitr::kable(
+  top_7_sections,
+  col.names = c("NYT Section", "Number of Articles"),
+  caption = "Top 7 New York Times Sections by Article Count",
+  align = c("l", "c")
+)
+```
+
+The table summarizes the seven sections represented in the New York Times Most Popular API results. The U.S. section ranked first with 10 articles, followed by Opinion with 5 articles. Arts, New York, Polls, Well, and World each contributed one article. These results show that the U.S. and Opinion sections together accounted for 75% of the 20 articles returned by the API, making them the most frequently represented sections in this dataset.
+
+
+<a id="mySection2b"></a>
+<font size="4">
+<B>
+Visualization Interpretation
+</B>
+</font>
+
+
+```{r}
+ 
+section_counts %>%
+  ggplot(aes(x = reorder(section, n), y = n)) +
+  geom_col(fill = "lightblue", color = "gray40", width = 0.7) +
+  geom_text(aes(label = n), hjust = -0.3, size = 4) +
+  coord_flip() +
+  labs(
+    title = "Most-Viewed New York Times Articles by Section",
+    subtitle = "Distribution of articles returned by the API over the past seven days",
+    x = "NYT Section",
+    y = "Number of Articles"
+  ) +
+  expand_limits(y = max(section_counts$n) + 2) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 10),
+    axis.title = element_text(face = "bold"),
+    panel.grid.major.y = element_blank()
+  )
+ 
+```
+
+The bar chart shows the distribution of the 20 most-viewed New York Times articles across different sections. The U.S. section has the highest number of articles (10), followed by Opinion (5). The remaining sections—Arts, New York, Polls, Well, and World—each have one article. The visualization makes it easy to compare the sections and shows that U.S. news and Opinion together account for 75% of the articles in the dataset.
+
+<a id="mySection85"></a>
+<font size="4">
+<B>
+Results
+</B>
+</font>
+
+
+The results show that the U.S. section had the highest number of articles on the New York Times most-viewed list, with 10 out of 20 articles (50%). The Opinion section ranked second with 5 articles (25%), while the remaining five sections each had one article (5%). This suggests that U.S. news and opinion articles received significant attention among readers. Overall, the findings indicate that these two sections dominated the most-viewed articles returned by the API during the seven-day period.
+
+<a id="mySection86"></a>
+<font size="4">
+<B>
+Conclusion
+</B>
+</font>
+
+In this assignment, I used the New York Times Most Popular API to retrieve and analyze the most-viewed articles from the past seven days. Using R, I successfully retrieved the JSON data, converted it into a tidy data frame, cleaned the relevant variables, and summarized the number of articles by section.
+
+The results showed that the U.S. section had the highest representation, with 10 out of 20 articles (50%), followed by the Opinion section with 5 articles (25%). The remaining sections each contributed one article. These findings suggest that U.S. news and opinion articles were particularly prominent among the most-viewed articles returned by the API.
+
+Overall, this assignment helped me gain practical experience working with a public API, processing JSON data, and using R for data cleaning, analysis, and visualization. Although the analysis was limited to 20 articles from a single API request, it demonstrated how API data can be transformed into useful information for answering a research question.
+
+
+<br>
+<br>
+
+
+ </div>
+
+</div>
+
+
+
+<style>
+/* Make the left column fixed (sticky) while scrolling */
+.section.level3:first-of-type {
+  position: sticky;
+  top: 10px;
+}
+
+/* Optional: add smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide the top title/header bar */
+.navbar, .navbar-default {
+  display: none !important;
+}
+
+
+</style>
+
+<script>
+Split(['#left-panel', '#right-panel'], {
+  sizes: [20, 80],      // initial width percentage
+  minSize: [150, 300],  // min width in pixels
+  gutterSize: 6,        // width of the draggable gutter
+  cursor: 'col-resize'
+});
+</script>
+
+<style>
+.gutter {
+  background-color: #ddd;
+  cursor: col-resize;
+}
+</style>
+
+
+
+
