@@ -1,0 +1,225 @@
+---
+title: "Assignment 10A – Sentiment Analysis: Approach"
+author: "Bikash Bhowmik"
+date: "05-NOV-2026"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+    self_contained: true
+---
+
+<style>
+/* Readable report typography */
+body {
+  font-size: 17px;
+}
+
+/* Single spacing within each paragraph; extra space between paragraphs */
+p {
+  font-size: 17px !important;
+  line-height: 1.0 !important;
+  margin-bottom: 1em !important;
+}
+
+/* Headings */
+h1 { font-size: 30px !important; }
+h2 { font-size: 25px !important; }
+h3 { font-size: 21px !important; }
+
+/* Lists */
+li {
+  font-size: 17px;
+  line-height: 1.0;
+  margin-bottom: 0.45em;
+}
+
+/* Tables and code */
+table { font-size: 15px; }
+pre, code { font-size: 14px; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+</style>
+
+## 1. Introduction and Objective
+
+The objective of this assignment is to reproduce and extend the sentiment analysis example presented in Chapter 2, Sentiment Analysis with Tidy Data, of Text Mining with R by Julia Silge and David Robinson.
+
+The first part of the assignment will reproduce the sentiment analysis workflow demonstrated in the book using text from Jane Austen's novels. This analysis will apply three established sentiment lexicons: Bing, NRC, and AFINN. The goal is to understand how tidy text mining techniques can be used to identify and examine sentiment patterns in literary works.
+
+The second part will extend the original analysis by applying the same techniques to a different text corpus: the IMDb Movie Reviews dataset. In addition to the three original sentiment lexicons, the Syuzhet sentiment lexicon will be incorporated to provide another perspective on sentiment classification.
+
+By analyzing two different types of text and comparing multiple sentiment lexicons, this assignment will demonstrate how sentiment analysis results can vary depending on the nature of the text and the sentiment dictionary used.
+
+## 2. Source Material
+
+The primary reference for this assignment is Chapter 2, "Sentiment Analysis with Tidy Data," from Text Mining with R: A Tidy Approach by Julia Silge and David Robinson.
+
+The chapter introduces important techniques for performing sentiment analysis using tidy text principles. These include:
+
+- Converting unstructured text into a tidy format using tokenization.
+- Connecting individual words with established sentiment lexicons.
+- Identifying positive and negative words in a text corpus.
+- Calculating and comparing sentiment scores.
+- Examining how sentiment changes throughout a book.
+- Visualizing sentiment patterns using R.
+
+The original Jane Austen example will serve as the foundation for the first part of this assignment. The implementation and visualizations will follow the methodology presented in the chapter, with appropriate references to the book and its supporting online materials included in the final report.
+
+## 3. Selected Dataset for Extension
+
+For the second part of the assignment, I will use the IMDb Movie Reviews dataset, which contains approximately 50,000 movie reviews classified as either positive or negative.
+
+The dataset is available from Kaggle:
+
+<https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews>
+
+The dataset contains two primary variables:
+
+- **review:** The written text of the movie review.
+- **sentiment:** The original classification of the review as positive or negative.
+
+This dataset is appropriate for sentiment analysis because it contains a large collection of opinion-based text. Unlike literary works, where sentiment may change gradually throughout a narrative, movie reviews generally express direct opinions about movies.
+
+The existing positive and negative labels will also provide an opportunity to evaluate how closely lexicon-based sentiment analysis agrees with the original classifications.
+
+For reproducibility, a copy of the dataset will be uploaded to my GitHub repository. The Quarto report will access the dataset through its raw GitHub URL, allowing the analysis to be executed without manually importing the file.
+
+## 4. Methodology and Planned Workflow
+
+The assignment will be divided into two major parts.
+
+### Part 1: Reproducing the Original Jane Austen Analysis
+
+The first part will follow the methodology presented in Chapter 2 of Text Mining with R.
+
+The planned steps are:
+
+1. Load the required R packages, including tidyverse, tidytext, and janeaustenr.
+2. Import Jane Austen's novels using the janeaustenr package.
+3. Organize the novels into a structured dataset, identifying each book and its corresponding text.
+4. Tokenize the text into individual words using `unnest_tokens()`.
+5. Apply the Bing, NRC, and AFINN sentiment lexicons by joining the tokenized text with the corresponding sentiment dictionaries.
+6. Calculate positive and negative sentiment patterns throughout the novels.
+7. Examine sentiment changes across different sections of the books.
+8. Recreate relevant tables, summaries, and visualizations from the original chapter.
+9. Compare the results produced by the three sentiment lexicons.
+
+This section will establish a baseline for understanding how tidy text mining techniques can be used to analyze sentiment in literary text.
+
+### Part 2: Extending the Analysis with IMDb Movie Reviews
+
+The second part will apply the same sentiment analysis approach to the IMDb Movie Reviews dataset.
+
+The planned steps are:
+
+1. Load the IMDb dataset directly from the raw GitHub repository.
+2. Inspect the dataset and identify missing or incomplete observations.
+3. Retain the relevant review text and sentiment classification columns.
+4. Clean and tokenize the review text into individual words using `unnest_tokens()`.
+5. Apply the Bing sentiment lexicon to identify positive and negative words.
+6. Apply the NRC lexicon to examine sentiment categories, including emotions such as joy, anger, sadness, fear, and trust.
+7. Apply the AFINN lexicon to calculate numerical sentiment scores.
+8. Incorporate the Syuzhet sentiment lexicon as an additional approach to sentiment analysis.
+9. Calculate sentiment summaries for positive and negative movie reviews.
+10. Compare the results across all four sentiment lexicons.
+11. Evaluate the agreement between lexicon-based sentiment results and the original IMDb review classifications.
+
+The extension will help determine whether sentiment lexicons designed for general English text perform similarly when applied to movie reviews.
+
+## 5. Data Preparation and Processing
+
+Data preparation will follow tidy text mining principles throughout both parts of the assignment.
+
+For the Jane Austen novels, the original text will be organized by book and divided into individual word tokens. The book identifier and word position will be retained so that sentiment changes can be examined throughout each novel.
+
+For the IMDb dataset, the review text will be converted into individual word tokens. The original review classification will be preserved so that the sentiment analysis results can be compared against the actual positive or negative labels.
+
+The data preparation process will include:
+
+- Removing missing or empty review records.
+- Converting text into lowercase where appropriate.
+- Tokenizing reviews into individual words.
+- Removing punctuation and unnecessary characters through tokenization.
+- Preserving the original review classification.
+- Matching words against the selected sentiment lexicons.
+
+Because sentiment dictionaries do not contain every word in the English language, some words will not match any lexicon. Differences in vocabulary coverage will be considered when interpreting the results.
+
+The analysis will also distinguish between word-level sentiment scores and overall review classifications. This is important because a review may contain both positive and negative language, even when its original classification is clearly positive or negative.
+
+## 6. Sentiment Lexicons
+
+Four sentiment lexicons will be used in this assignment.
+
+### Bing Lexicon
+
+The Bing lexicon classifies words into two sentiment categories: positive and negative. It will be used to identify the balance of positive and negative language in both Jane Austen's novels and the IMDb reviews.
+
+### NRC Lexicon
+
+The NRC lexicon identifies positive and negative sentiment as well as eight emotional categories: anger, anticipation, disgust, fear, joy, sadness, surprise, and trust. It will provide a broader understanding of the emotions expressed in the text.
+
+### AFINN Lexicon
+
+The AFINN lexicon assigns numerical sentiment scores to words, generally ranging from -5 to +5. Negative values indicate negative sentiment, while positive values indicate positive sentiment. These scores will be used to calculate overall sentiment values.
+
+### Syuzhet Lexicon
+
+The Syuzhet lexicon provides another method for identifying sentiment in text. It will be incorporated as an additional lexicon to examine whether using a different sentiment dictionary produces results similar to or different from those obtained with Bing, NRC, and AFINN.
+
+Comparing these four lexicons will help demonstrate how different approaches to sentiment classification can influence the interpretation of the same text.
+
+## 7. Expected Analysis and Comparison
+
+The assignment will examine sentiment patterns in both literary text and movie reviews.
+
+For the Jane Austen novels, I expect to observe changes in sentiment throughout the narrative. These changes may reflect different events, character interactions, conflicts, and developments in the stories.
+
+For the IMDb movie reviews, I expect the sentiment patterns to be more directly associated with reviewers' opinions. Positive reviews may contain a greater proportion of positive words, while negative reviews may contain more negative words.
+
+The comparison will focus on three main areas:
+
+### 7.1 Comparison Between Text Corpora
+
+The analysis will compare sentiment patterns in Jane Austen's novels with those found in IMDb movie reviews. This will demonstrate how sentiment analysis behaves differently when applied to literary narratives and opinion-based reviews.
+
+### 7.2 Comparison Between Sentiment Lexicons
+
+The Bing, NRC, AFINN, and Syuzhet lexicons will be compared to determine whether they produce consistent sentiment results. Differences may occur because the lexicons use different vocabularies, scoring methods, and classification approaches.
+
+### 7.3 Comparison with Actual IMDb Classifications
+
+Because the IMDb dataset includes original positive and negative labels, the lexicon-based results can be evaluated against these classifications.
+
+For example, I will examine whether reviews labeled positive generally receive higher sentiment scores than reviews labeled negative. I will also consider the percentage of reviews for which the lexicon-based predictions agree with the original labels.
+
+This comparison will provide a practical evaluation of the strengths and limitations of dictionary-based sentiment analysis.
+
+## 8. Expected Outcomes
+
+The expected outcome is a reproducible Quarto report that demonstrates the application of tidy text mining techniques to two different text collections.
+
+The completed report will:
+
+- Reproduce the major sentiment analysis steps from Chapter 2 of Text Mining with R.
+- Apply the Bing, NRC, and AFINN sentiment lexicons to Jane Austen's novels.
+- Extend the original analysis to the IMDb Movie Reviews dataset.
+- Incorporate the Syuzhet lexicon as an additional sentiment analysis method.
+- Generate descriptive summaries, comparisons, and visualizations.
+- Examine differences in sentiment patterns between literary text and movie reviews.
+- Evaluate the relationship between lexicon-based sentiment scores and the original IMDb classifications.
+- Provide reproducible R code and appropriate references.
+
+Overall, this assignment will demonstrate that sentiment analysis is influenced by both the characteristics of the text being analyzed and the sentiment lexicon selected. It will also illustrate the advantages and limitations of using dictionary-based methods to analyze natural language.
+
+## 9. References
+
+Kaggle. (n.d.). IMDb dataset of 50K movie reviews. <https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews>
+
+Robinson, D., & Silge, J. (n.d.). Sentiment analysis with tidy data. Text Mining with R. <https://www.tidytextmining.com/sentim>
+
+Silge, J., & Robinson, D. (2017). *Text mining with R: A tidy approach*. O'Reilly Media. <https://www.tidytextmining.com/>

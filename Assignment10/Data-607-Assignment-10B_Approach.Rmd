@@ -1,0 +1,366 @@
+---
+title: "Assignment 10B – NobelPrize.org: Approach"
+author: "Bikash Bhowmik"
+date: "05-NOV-2026"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+    self_contained: true
+---
+
+<style>
+/* Readable report typography */
+body {
+  font-size: 17px;
+}
+
+/* Single spacing within each paragraph; extra space between paragraphs */
+p {
+  font-size: 17px !important;
+  line-height: 1.0 !important;
+  margin-bottom: 1em !important;
+}
+
+/* Headings */
+h1 { font-size: 30px !important; }
+h2 { font-size: 25px !important; }
+h3 { font-size: 21px !important; }
+
+/* Lists */
+li {
+  font-size: 17px;
+  line-height: 1.0;
+  margin-bottom: 0.45em;
+}
+
+/* Tables and code */
+table { font-size: 15px; }
+pre, code { font-size: 14px; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+</style>
+
+
+## 1. Introduction and Objective
+
+The objective of this assignment is to retrieve, process, and analyze Nobel Prize data from the official Nobel Prize API using R. The data is provided in JSON format and contains information about Nobel Prize categories, award years, laureates, birthplaces, countries, and institutional affiliations.
+
+This project will demonstrate how JSON data can be accessed from a public API, parsed into R, and transformed from nested structures into organized and analysis-ready data frames using tidy data principles.
+
+After preparing the data, I will conduct exploratory data analysis to answer four research questions related to Nobel Prize awards and laureates. The questions will examine award distributions across categories and decades, the countries where laureates were born, and the relationship between laureates' birth countries and their professional affiliations.
+
+In addition to basic summaries and frequency counts, the project will include comparisons across multiple variables to identify patterns in the geographical representation of Nobel laureates.
+
+The final deliverable will be a single reproducible Quarto document containing the research questions, R code, data retrieval and transformation procedures, statistical summaries, visualizations, and interpretations of the findings.
+
+## 2. Data Source
+
+This project will use the official Nobel Prize API provided by NobelPrize.org through its Developer Zone.
+
+The primary API endpoints are:
+
+- [Nobel Prizes API](https://api.nobelprize.org/2.1/nobelPrizes)
+
+- [Laureates API](https://api.nobelprize.org/2.1/laureates)
+
+The Nobel Prize API provides structured information about Nobel Prize awards and individual laureates. The available information includes prize categories, award years, laureate names, birth dates, birthplaces, affiliations, and award motivations.
+
+API documentation:
+
+[Nobel Prize API documentation](https://www.nobelprize.org/about/developer-zone-2/)
+
+The data will be retrieved directly from the API using R rather than relying on manually downloaded datasets. This approach will make the analysis more reproducible because the data collection, JSON parsing, and transformation procedures will be documented in the Quarto report.
+
+The Nobel Prize and laureate endpoints will be used together when necessary to obtain the information required for the four research questions.
+
+## 3. Research Questions
+
+The analysis will focus on the following four questions.
+
+### Question 1: Distribution of Nobel Prize Categories
+
+Which Nobel Prize categories have received the highest number of awards?
+
+This question will examine how Nobel Prize awards are distributed across the different categories, including Physics, Chemistry, Physiology or Medicine, Literature, Peace, and Economic Sciences.
+
+The analysis will calculate the number of awards in each category and present the results using summary tables and visualizations.
+
+The purpose is to identify which categories have historically received the greatest number of Nobel Prize awards.
+
+### Question 2: Nobel Prize Awards Across Decades
+
+Which decades have recorded the highest number of Nobel Prize awards and laureates?
+
+This question will examine how Nobel Prize activity has changed over time.
+
+The award year will be converted into decades, allowing the data to be grouped and summarized by ten-year periods.
+
+The analysis will compare the number of prizes awarded and the number of laureates recognized during each decade. This distinction is important because a single Nobel Prize may be shared by multiple individuals.
+
+The results will help identify periods of particularly high Nobel Prize activity and show how the distribution of awards has changed over time.
+
+### Question 3: Geographical Distribution of Nobel Laureates
+
+Which birth countries are most frequently represented among Nobel Prize laureates?
+
+This question will investigate the geographical distribution of Nobel laureates based on their reported countries of birth.
+
+The analysis will extract birth-country information from the laureate records, clean and standardize the country names where possible, and calculate the number of laureates associated with each country.
+
+The results will be presented in ranked tables and visualizations to identify the countries with the highest representation among Nobel laureates.
+
+Records with missing or unavailable birth-country information will be identified and handled separately rather than being assigned to an assumed country.
+
+### Question 4: Birth Country Compared with Affiliation Country
+
+How often do Nobel laureates have an affiliation country different from their country of birth, and which countries are most frequently represented in these differences?
+
+This question will extend the analysis beyond basic frequency counts by comparing two geographical characteristics of Nobel laureates: their reported birth country and their professional affiliation country at the time of the award.
+
+The analysis will identify laureates whose recorded affiliation country differs from their birth country.
+
+It will then examine:
+
+- Which birth countries are most frequently represented among laureates affiliated with another country.
+
+- Which affiliation countries are most frequently associated with foreign-born laureates.
+
+- How frequently birth-country and affiliation-country information differ.
+
+- Whether certain countries have a particularly high representation of laureates born elsewhere.
+
+This comparison will provide insight into the international movement and geographical distribution of Nobel laureates.
+
+It is important to recognize that a difference between birth country and affiliation country does not necessarily indicate migration or a loss of talent. Historical border changes, citizenship differences, incomplete records, and institutional arrangements may also explain these differences.
+
+Therefore, the results will be interpreted as differences between recorded birth and affiliation locations rather than direct evidence of migration.
+
+## 4. Methodology and Planned Workflow
+
+The project will use R and tidyverse tools to retrieve, transform, and analyze the Nobel Prize JSON data.
+
+The planned workflow consists of the following steps.
+
+### Step 1: Load Required R Packages
+
+The analysis will use the following packages:
+
+- httr2 or jsonlite for retrieving and parsing JSON API responses.
+
+- tidyverse for data manipulation and visualization.
+
+- dplyr for filtering, grouping, and summarizing data.
+
+- tidyr for restructuring nested data.
+
+- purrr for working with lists and mapping functions.
+
+- stringr for cleaning and extracting text.
+
+- ggplot2 for creating visualizations.
+
+- knitr for presenting formatted tables.
+
+### Step 2: Retrieve JSON Data from the Nobel Prize API
+
+The Nobel Prize and laureate API endpoints will be accessed directly from R.
+
+The API responses will be retrieved in JSON format and stored for further processing.
+
+The response status and structure will be checked to ensure that the API requests are successful.
+
+### Step 3: Parse and Inspect JSON Structures
+
+The JSON responses will be parsed into R objects, such as nested lists.
+
+The structure of the returned data will be inspected to identify important fields, including:
+
+- Prize year.
+
+- Prize category.
+
+- Laureate identification and name.
+
+- Birth date and birth country.
+
+- Affiliation organization.
+
+- Affiliation country.
+
+- Award motivation.
+
+This inspection will help determine how the nested information should be extracted and organized.
+
+### Step 4: Transform Nested JSON into Tidy Data Frames
+
+The nested JSON objects will be converted into rectangular data frames using appropriate functions from tidyr, purrr, and dplyr.
+
+Depending on the structure of the API responses, nested laureate and affiliation information may require additional unnesting and transformation.
+
+Separate data frames may be created for:
+
+- Nobel Prize information.
+
+- Individual laureate information.
+
+- Birth-country information.
+
+- Affiliation and organization information.
+
+The goal is to create clean and structured datasets that can be easily analyzed and combined.
+
+### Step 5: Clean and Standardize Variables
+
+The extracted data will be cleaned before conducting the analysis.
+
+This process will include:
+
+- Standardizing column names.
+
+- Converting award years into numeric values.
+
+- Creating a decade variable from the award year.
+
+- Cleaning country names and removing unnecessary whitespace.
+
+- Identifying missing or incomplete records.
+
+- Preserving unique laureate and prize identifiers.
+
+- Separating individual laureates from organizational award recipients where appropriate.
+
+### Step 6: Combine and Analyze Relevant Data
+
+The prepared data frames will be joined using appropriate identifiers, such as laureate IDs and prize information.
+
+The resulting datasets will support comparisons between prize categories, award years, birth countries, and affiliation countries.
+
+Particular attention will be given to Question 4, which requires comparing birth-country and affiliation-country fields.
+
+### Step 7: Generate Tables and Visualizations
+
+Each research question will be supported by appropriate statistical summaries and visualizations.
+
+Examples include:
+
+- Bar charts showing Nobel Prize awards by category.
+
+- Column charts showing awards and laureates by decade.
+
+- Ranked tables and bar charts showing laureates by birth country.
+
+- Comparative tables and charts showing differences between birth countries and affiliation countries.
+
+### Step 8: Interpret the Results
+
+Each question will include a short explanation of the findings.
+
+The interpretations will focus on identifying meaningful patterns, comparing groups, and explaining potential limitations in the available data.
+
+## 5. Data Preparation and Transformation
+
+One of the main challenges of this project will be transforming the hierarchical JSON responses into tidy data frames suitable for analysis.
+
+Unlike a traditional CSV file, JSON data can contain nested objects and arrays. For example, one Nobel Prize record may contain multiple laureates, and each laureate may have multiple affiliations.
+
+The following preparation steps will be considered:
+
+**Handling nested structures:** Nested laureate, prize, and affiliation information will be extracted and unnested into appropriate rows and columns.
+
+**Managing multiple laureates:** Since a Nobel Prize can be shared by multiple individuals, the analysis will distinguish between the number of prizes awarded and the number of individual laureates.
+
+**Handling organizational recipients:** Some Nobel Prizes are awarded to organizations rather than individuals. These records will be identified and treated separately when analyzing individual birth countries.
+
+**Cleaning geographical information:** Birth countries and affiliation countries will be standardized where possible to support consistent comparisons.
+
+**Managing missing values:** Missing birth dates, birth countries, or affiliation information will be identified and excluded only when necessary for a particular analysis.
+
+**Creating additional variables:** The award year will be used to calculate decades, and country comparisons will be created to identify differences between birth and affiliation locations.
+
+Only the variables necessary to answer the four research questions will be retained in the final analytical datasets.
+
+## 6. Data Validation and Quality Checks
+
+To ensure that the results are reliable and reproducible, several validation checks will be performed throughout the analysis.
+
+These checks will include:
+
+1. Confirming that API requests complete successfully and return valid JSON responses.
+
+2. Inspecting the structure of the JSON data before and after parsing.
+
+3. Verifying that important variables, such as award year, category, and laureate identifiers, are available after transformation.
+
+4. Checking the number of records before and after unnesting nested objects.
+
+5. Identifying duplicate laureate or prize records.
+
+6. Examining missing values in birth-country and affiliation-country fields.
+
+7. Reviewing distinct category names and award-year ranges.
+
+8. Confirming that the number of individual laureates is not incorrectly treated as the number of Nobel Prize awards.
+
+9. Checking that birth-country and affiliation-country comparisons use compatible geographical information.
+
+These validation procedures will help prevent incorrect counts, duplication, and misleading conclusions.
+
+## 7. Anticipated Challenges and Limitations
+
+Several challenges may arise while retrieving and analyzing the Nobel Prize API data.
+
+**Nested JSON structures:** The API contains multiple levels of nested information. Extracting laureate and affiliation details may require several transformation steps before the data becomes suitable for analysis.
+
+**Multiple laureates per prize:** A single prize may be awarded to more than one person. Therefore, prize counts and laureate counts must be calculated separately.
+
+**Historical geographical changes:** Country names and national boundaries have changed over time. A laureate's recorded birthplace may not correspond to a present-day country in every historical record.
+
+**Missing information:** Some laureates may not have complete birth or affiliation information. These records may need to be excluded from specific comparisons.
+
+**Multiple affiliations:** Some laureates may have more than one institutional affiliation, potentially involving different countries. The analysis will need to account for these records carefully to avoid double counting.
+
+**Interpretation of country differences:** A difference between birth country and affiliation country does not necessarily demonstrate that a person migrated or that one country lost a Nobel laureate. The results will be interpreted as geographical differences in the recorded data.
+
+These limitations will be acknowledged in the final report to ensure that the findings are presented accurately.
+
+## 8. Expected Outcomes
+
+The expected outcome is a single reproducible Quarto report demonstrating the complete process of retrieving Nobel Prize data from a public JSON API, transforming nested information into tidy data frames, and performing exploratory data analysis in R.
+
+The final report will:
+
+- Retrieve Nobel Prize information directly from the official API.
+
+- Demonstrate how to parse and process nested JSON data.
+
+- Transform JSON objects into clean and organized tidy data frames.
+
+- Analyze the distribution of Nobel Prize awards across categories.
+
+- Examine award and laureate trends across decades.
+
+- Identify the countries most frequently represented among laureates based on birth country.
+
+- Compare laureates' birth countries with their recorded affiliation countries.
+
+- Present findings through tables, statistical summaries, and visualizations.
+
+- Include appropriate data validation and discussion of limitations.
+
+- Provide reproducible R code and references to the official API documentation.
+
+Overall, this project will demonstrate practical skills in API data retrieval, JSON processing, data transformation, data cleaning, and exploratory data analysis using R.
+
+It will also show how publicly available structured data can be transformed into meaningful information and used to investigate broader patterns in the geographical and historical distribution of Nobel Prize laureates.
+
+## 9. References
+
+Nobel Prize Outreach. (n.d.). Nobel Prize API. NobelPrize.org. <https://www.nobelprize.org/about/developer-zone-2/>
+
+Nobel Prize Outreach. (n.d.). Nobel Prize API 2.1: Nobel Prizes endpoint. <https://api.nobelprize.org/2.1/nobelPrizes>
+
+Nobel Prize Outreach. (n.d.). Nobel Prize API 2.1: Laureates endpoint. <https://api.nobelprize.org/2.1/laureates>
