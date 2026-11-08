@@ -1,0 +1,489 @@
+---
+title: "Assignment 10B – Nobel Prize JSON Codebase"
+author: "Bikash Bhowmik"
+date: "07-Nov-2026"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+    df_print: paged
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 9,
+  fig.height = 5
+)
+```
+
+# Introduction
+
+This assignment retrieves public JSON data from the official **Nobel Prize API** (NobelPrize.org Developer Zone), converts the nested JSON into tidy data frames in R, and uses those tables to answer four questions:
+
+1. Which Nobel Prize categories have been awarded most frequently?
+2. Which decades have had the most Nobel Prize awards?
+3. Which birth countries have produced the most Nobel laureates?
+4. Which countries appear to "lose" the most laureates, meaning laureates born in one country but affiliated with an institution in another country when they received the prize?
+
+Questions 1 to 3 are frequency summaries. Question 4 goes further: it compares two country fields (birth country and award-time affiliation country) across tables, so it needs filtering and cross-field comparison rather than a simple count.
+
+# Data Source
+
+The data come from two endpoints of the Nobel Prize API (version 2.1):
+
+- `https://api.nobelprize.org/2.1/nobelPrizes`
+- `https://api.nobelprize.org/2.1/laureates`
+
+The endpoints return JSON describing prize categories, award years, laureates, birth places, affiliations, and award motivations. Documentation is at <https://www.nobelprize.org/about/developer-zone-2/>. The data are requested directly from the API instead of from downloaded files, so the whole retrieval and cleaning process is reproducible from this document. The results reflect the API's contents at the time of knitting.
+
+# Setup
+
+```{r libraries}
+library(httr2)
+library(tidyverse)
+library(knitr)
+```
+
+These packages handle the API requests (`httr2`), data wrangling and plots (`tidyverse`), and table formatting (`knitr`).
+
+# Retrieving the Data
+
+## Helper functions
+
+The API returns many fields as nested objects, often with a language key such as `en`. Two small helpers keep the extraction code readable.
+
+```{r helpers}
+# Return y when x is NULL or empty
+`%||%` <- function(x, y) {
+  if (is.null(x) || length(x) == 0) y else x
+}
+
+# Pull an English string out of a field that may be a plain string,
+# a list with an `en` element, or missing
+get_en_value <- function(x) {
+  if (is.null(x) || length(x) == 0) return(NA_character_)
+  if (is.character(x)) return(x[[1]])
+  if (is.list(x) && !is.null(x$en)) return(as.character(x$en[[1]]))
+  NA_character_
+}
+```
+
+## Fetching every page
+
+The API is paginated and returns only 25 records per request by default. The function below follows each response's `next` link until no pages remain, so the full dataset is collected.
+
+```{r fetch-data, cache=TRUE}
+```{r fetch-data, cache=TRUE}
+fetch_all_pages <- function(base_url, results_key, limit = 500) {
+
+  all_results <- list()
+  offset <- 0
+
+  repeat {
+
+    message("Downloading records starting at offset: ", offset)
+
+    resp <- request(base_url) |>
+      req_user_agent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36"
+      ) |>
+      req_headers(
+        Accept = "application/json"
+      ) |>
+      req_url_query(
+        limit = limit,
+        offset = offset
+      ) |>
+      req_retry(max_tries = 3) |>
+      req_perform()
+
+    page <- resp_body_json(
+      resp,
+      simplifyVector = FALSE
+    )
+
+    records <- page[[results_key]]
+
+    if (is.null(records) || length(records) == 0) {
+      break
+    }
+
+    all_results <- c(all_results, records)
+
+    if (length(records) < limit) {
+      break
+    }
+
+    offset <- offset + limit
+
+    # Avoid sending requests too quickly
+    Sys.sleep(0.5)
+  }
+
+  return(all_results)
+}
+
+# Retrieve Nobel Prize records
+prizes_raw <- fetch_all_pages(
+  "https://api.nobelprize.org/2.1/nobelPrizes",
+  "nobelPrizes"
+)
+
+# Retrieve Nobel laureate records
+laureates_raw <- fetch_all_pages(
+  "https://api.nobelprize.org/2.1/laureates",
+  "laureates"
+)
+
+# Validate retrieval
+stopifnot(
+  length(prizes_raw) > 0,
+  length(laureates_raw) > 0
+)
+
+tibble(
+  endpoint = c("nobelPrizes", "laureates"),
+  records_retrieved = c(
+    length(prizes_raw),
+    length(laureates_raw)
+  )
+) %>%
+  kable(caption = "Records retrieved from the Nobel Prize API")
+
+```
+
+# Building Tidy Data Frames
+
+Four tidy tables are built from the nested JSON. Each answers a different level of question.
+
+## Prize-level table
+
+One row per prize award, used for the category and decade summaries.
+
+```{r prizes-tbl}
+prizes_tbl <- map_dfr(prizes_raw, function(prize) {
+  tibble(
+    award_year = as.integer(prize$awardYear %||% NA_character_),
+    category = get_en_value(prize$category),
+    category_full = get_en_value(prize$categoryFullName)
+  )
+}) %>%
+  distinct() %>%
+  mutate(decade = floor(award_year / 10) * 10)
+
+glimpse(prizes_tbl)
+```
+
+## Laureate-level table
+
+One row per laureate with core birth information. Both the birth country as recorded at the time and the present-day country name (`countryNow`) are kept. Present-day names make countries comparable across political changes, for example places that were in the German Empire or Austria-Hungary at the time.
+
+```{r laureates-tbl}
+laureates_tbl <- map_dfr(laureates_raw, function(laureate) {
+  tibble(
+    laureate_id = as.character(laureate$id %||% NA_character_),
+    laureate_name = coalesce(
+      get_en_value(laureate$knownName),
+      get_en_value(laureate$fullName),
+      get_en_value(laureate$orgName)
+    ),
+    gender = as.character(laureate$gender %||% NA_character_),
+    birth_country = get_en_value(laureate$birth$place$country),
+    birth_country_now = get_en_value(laureate$birth$place$countryNow)
+  )
+})
+
+glimpse(laureates_tbl)
+```
+
+## Laureate–prize table
+
+The `nobelPrizes` field inside each laureate is a list, because some people won more than once. This table expands it so each laureate–prize combination is one row.
+
+```{r laureate-prizes-tbl}
+laureate_prizes_tbl <- map_dfr(laureates_raw, function(laureate) {
+  prizes <- laureate$nobelPrizes
+  if (is.null(prizes) || length(prizes) == 0) return(tibble())
+
+  laureate_id <- as.character(laureate$id %||% NA_character_)
+  laureate_name <- coalesce(
+    get_en_value(laureate$knownName),
+    get_en_value(laureate$fullName),
+    get_en_value(laureate$orgName)
+  )
+  birth_country <- get_en_value(laureate$birth$place$country)
+  birth_country_now <- get_en_value(laureate$birth$place$countryNow)
+
+  map_dfr(prizes, function(prize) {
+    tibble(
+      laureate_id = laureate_id,
+      laureate_name = laureate_name,
+      birth_country = birth_country,
+      birth_country_now = birth_country_now,
+      award_year = as.integer(prize$awardYear %||% NA_character_),
+      category = get_en_value(prize$category),
+      motivation = get_en_value(prize$motivation)
+    )
+  })
+}) %>%
+  mutate(decade = floor(award_year / 10) * 10)
+
+glimpse(laureate_prizes_tbl)
+```
+
+## Laureate–prize–affiliation table
+
+Each prize record can list one or more affiliations (the institutions the laureate was associated with when awarded). This table pulls the affiliation country, preferring the present-day name, and is used for Question 4. Prizes with no affiliation (for example Peace or Literature awards to individuals, or organizations) keep a row with a missing affiliation country.
+
+```{r affiliations-tbl}
+affiliations_tbl <- map_dfr(laureates_raw, function(laureate) {
+  prizes <- laureate$nobelPrizes
+  if (is.null(prizes) || length(prizes) == 0) return(tibble())
+
+  laureate_id <- as.character(laureate$id %||% NA_character_)
+  laureate_name <- coalesce(
+    get_en_value(laureate$knownName),
+    get_en_value(laureate$fullName),
+    get_en_value(laureate$orgName)
+  )
+  birth_country <- get_en_value(laureate$birth$place$country)
+  birth_country_now <- get_en_value(laureate$birth$place$countryNow)
+
+  map_dfr(prizes, function(prize) {
+    affiliations <- prize$affiliations
+    award_year <- as.integer(prize$awardYear %||% NA_character_)
+    category <- get_en_value(prize$category)
+
+    # One row per affiliation; one NA row if none are listed
+    aff_countries <- if (is.null(affiliations) || length(affiliations) == 0) {
+      NA_character_
+    } else {
+      map_chr(affiliations, function(aff) {
+        coalesce(get_en_value(aff$countryNow), get_en_value(aff$country))
+      })
+    }
+
+    tibble(
+      laureate_id = laureate_id,
+      laureate_name = laureate_name,
+      birth_country = birth_country,
+      birth_country_now = birth_country_now,
+      award_year = award_year,
+      category = category,
+      affiliation_country = aff_countries
+    )
+  })
+}) %>%
+  mutate(decade = floor(award_year / 10) * 10)
+
+glimpse(affiliations_tbl)
+```
+
+# Validation Checks
+
+These checks confirm that the data were retrieved in full, that key fields were created, and that the unnesting behaved as expected.
+
+```{r validation-rows}
+tibble(
+  table = c("prizes_tbl", "laureates_tbl", "laureate_prizes_tbl", "affiliations_tbl"),
+  rows = c(nrow(prizes_tbl), nrow(laureates_tbl),
+           nrow(laureate_prizes_tbl), nrow(affiliations_tbl))
+) %>%
+  kable(caption = "Row counts for the tidy tables")
+```
+
+```{r validation-fields}
+tibble(
+  min_award_year = min(prizes_tbl$award_year, na.rm = TRUE),
+  max_award_year = max(prizes_tbl$award_year, na.rm = TRUE),
+  distinct_categories = n_distinct(prizes_tbl$category),
+  missing_birth_country = sum(is.na(laureates_tbl$birth_country_now)),
+  missing_affiliation_country = sum(is.na(affiliations_tbl$affiliation_country))
+) %>%
+  kable(caption = "Basic validation checks")
+```
+
+```{r validation-unnest}
+# Every laureate-prize row should come from a laureate in laureates_tbl,
+# and the affiliation table can only be as large or larger than the
+# laureate-prize table (one or more rows per prize).
+stopifnot(
+  all(laureate_prizes_tbl$laureate_id %in% laureates_tbl$laureate_id),
+  nrow(affiliations_tbl) >= nrow(laureate_prizes_tbl)
+)
+```
+
+The missing birth and affiliation counts are expected. Organizations (such as the Red Cross) have no birth place, and many Peace and Literature prizes have no listed affiliation.
+
+# Question 1: Which Categories Have Been Awarded Most Frequently?
+
+```{r q1-table}
+q1_category_counts <- prizes_tbl %>%
+  count(category, sort = TRUE)
+
+kable(q1_category_counts, caption = "Nobel Prize categories ranked by number of awards")
+```
+
+```{r q1-plot}
+ggplot(q1_category_counts, aes(x = reorder(category, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Nobel Prize Categories by Number of Awards",
+    x = "Category",
+    y = "Number of Awards"
+  )
+```
+
+**Interpretation.** `r q1_category_counts$category[1]` has the highest count in this pull of the data, with `r q1_category_counts$n[1]` awards. The five original categories (Chemistry, Literature, Peace, Physics, and Physiology or Medicine) have the same or nearly the same totals because they have been awarded since 1901. Economic Sciences has the lowest count (`r q1_category_counts$n[nrow(q1_category_counts)]` awards for `r q1_category_counts$category[nrow(q1_category_counts)]`) because it was introduced much later, in 1969.
+
+# Question 2: Which Decades Have Had the Most Nobel Prize Awards?
+
+```{r q2-table}
+q2_decade_counts <- prizes_tbl %>%
+  filter(!is.na(decade)) %>%
+  count(decade, sort = TRUE)
+
+kable(q2_decade_counts, caption = "Number of Nobel Prize awards by decade")
+```
+
+```{r q2-plot}
+ggplot(q2_decade_counts, aes(x = decade, y = n)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Nobel Prize Awards by Decade",
+    x = "Decade",
+    y = "Number of Awards"
+  )
+```
+
+**Interpretation.** The highest decade total is `r max(q2_decade_counts$n)` awards, reached in the decade(s) beginning `r paste(sort(q2_decade_counts$decade[q2_decade_counts$n == max(q2_decade_counts$n)]), collapse = ", ")`. That matches six categories awarded each year for ten years. Earlier decades tend to be lower, partly because Economic Sciences did not exist and because some prizes were not awarded during the world wars. The most recent decade has a lower count only because it is still in progress.
+
+# Question 3: Which Birth Countries Have Produced the Most Laureates?
+
+```{r q3-table}
+q3_birth_country_counts <- laureates_tbl %>%
+  filter(!is.na(birth_country_now)) %>%
+  count(birth_country_now, sort = TRUE)
+
+q3_birth_country_counts %>%
+  slice_head(n = 15) %>%
+  kable(caption = "Top 15 present-day birth countries of Nobel laureates")
+```
+
+```{r q3-plot}
+q3_birth_country_counts %>%
+  slice_head(n = 15) %>%
+  ggplot(aes(x = reorder(birth_country_now, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 15 Present-Day Birth Countries of Nobel Laureates",
+    x = "Birth Country (Present-Day)",
+    y = "Number of Laureates"
+  )
+```
+
+**Interpretation.** `r q3_birth_country_counts$birth_country_now[1]` is first with `r q3_birth_country_counts$n[1]` laureates, followed by `r q3_birth_country_counts$birth_country_now[2]` (`r q3_birth_country_counts$n[2]`) and `r q3_birth_country_counts$birth_country_now[3]` (`r q3_birth_country_counts$n[3]`). Nobel laureates are heavily concentrated in a small number of countries. Counts are by individual laureate and use present-day country names, and laureates with no recorded birth place (mostly organizations) are excluded.
+
+# Question 4: Which Countries Appear to Lose the Most Laureates?
+
+This question compares each laureate's **present-day birth country** with the **country of their award-time affiliation**. When the two differ, the laureate is treated as having moved across countries. A laureate–prize is counted once per birth country and affiliation country combination, and only rows where both countries are known are used.
+
+```{r q4-loss}
+cross_country_rows <- affiliations_tbl %>%
+  filter(
+    !is.na(birth_country_now),
+    !is.na(affiliation_country),
+    birth_country_now != affiliation_country
+  ) %>%
+  distinct(laureate_id, award_year, category, birth_country_now, affiliation_country)
+
+q4_country_loss <- cross_country_rows %>%
+  count(birth_country_now, sort = TRUE)
+
+q4_country_loss %>%
+  slice_head(n = 15) %>%
+  kable(caption = "Top 15 birth countries whose laureates were affiliated with another country at the time of the award")
+```
+
+```{r q4-plot}
+q4_country_loss %>%
+  slice_head(n = 15) %>%
+  ggplot(aes(x = reorder(birth_country_now, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Countries Losing Laureates to Another Affiliation Country",
+    x = "Birth Country (Present-Day)",
+    y = "Cross-Country Laureate Count"
+  )
+```
+
+## Country-to-country flows
+
+```{r q4-flows}
+q4_flows <- cross_country_rows %>%
+  count(birth_country_now, affiliation_country, sort = TRUE)
+
+q4_flows %>%
+  slice_head(n = 15) %>%
+  kable(caption = "Most common cross-country laureate flows (birth country to affiliation country)")
+```
+
+## Destination countries
+
+Total cross-country laureates received by each affiliation country.
+
+```{r q4-destinations}
+q4_destinations <- q4_flows %>%
+  group_by(affiliation_country) %>%
+  summarise(n = sum(n), .groups = "drop") %>%
+  arrange(desc(n))
+
+q4_destinations %>%
+  slice_head(n = 10) %>%
+  kable(caption = "Top 10 destination (affiliation) countries for cross-country laureates")
+```
+
+## Share of each country's laureate awards that crossed borders
+
+Raw counts favor countries with many laureates. This table puts the counts in proportion by dividing each country's cross-country awards by all of its laureate awards that have a known affiliation country.
+
+```{r q4-share}
+known_affiliation_awards <- affiliations_tbl %>%
+  filter(!is.na(birth_country_now), !is.na(affiliation_country)) %>%
+  distinct(laureate_id, award_year, category, birth_country_now) %>%
+  count(birth_country_now, name = "awards_with_affiliation")
+
+cross_awards <- cross_country_rows %>%
+  distinct(laureate_id, award_year, category, birth_country_now) %>%
+  count(birth_country_now, name = "cross_country_awards")
+
+q4_share <- cross_awards %>%
+  left_join(known_affiliation_awards, by = "birth_country_now") %>%
+  mutate(pct_cross_country = round(100 * cross_country_awards / awards_with_affiliation, 1)) %>%
+  filter(awards_with_affiliation >= 10) %>%
+  arrange(desc(pct_cross_country))
+
+q4_share %>%
+  slice_head(n = 15) %>%
+  kable(caption = "Countries (10 or more awards with a known affiliation) ranked by share of awards with a cross-country affiliation")
+```
+
+**Interpretation.** By raw count, `r q4_country_loss$birth_country_now[1]`, `r q4_country_loss$birth_country_now[2]`, and `r q4_country_loss$birth_country_now[3]` appear most often, meaning many laureates born there were affiliated with institutions in another country at the time of the award. The destination table shows that `r q4_destinations$affiliation_country[1]` receives the most cross-country laureates (`r q4_destinations$n[1]`), which suggests it has been a major attractor of Nobel-level researchers. The share table is a useful check because raw counts are driven partly by how many laureates a country has. Two cautions apply: affiliation is recorded only for some prizes, so the results describe laureates with known affiliations rather than all laureates, and "loses" describes where laureates were working at the time of the award, not why they moved.
+
+# Conclusion
+
+The Nobel Prize API data were retrieved in full, converted from nested JSON into tidy tables, validated, and used to answer four questions. The analysis showed how awards are distributed across categories, how activity changed across decades, which countries produced the most laureates, and which countries' laureates most often worked abroad at the time of the award. Together these steps cover JSON retrieval, nested-data handling, tidy transformation, and comparative analysis in one reproducible R Markdown workflow.
+
+# References
+
+NobelPrize.org. *Nobel Prize API (version 2.1) and Developer Zone*. <https://www.nobelprize.org/about/developer-zone-2/>
