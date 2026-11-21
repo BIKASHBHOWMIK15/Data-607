@@ -1,0 +1,527 @@
+---
+title: "DATA 607 — Discussion 11: Recommender Systems"
+subtitle: "Reverse Engineering and Scenario Design Analysis of YouTube's Recommendation System"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: false
+    code-fold: true
+    code-summary: "Show R code"
+    embed-resources: true
+    theme: cosmo
+    smooth-scroll: true
+    self-contained: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+**Bikash Bhowmik** <br>
+November 19, 2026<br>
+
+# Executive Summary
+
+YouTube recommendations appear in several product locations, particularly the Home feed and the “Up next” panel. Public documentation identifies signals such as watch history, search history, subscriptions, likes, dislikes, explicit feedback, and satisfaction surveys.
+
+The R analysis is a reproducible demonstration using a **synthetic viewing dataset**, not actual YouTube user records. It illustrates how watch events and stated preferences can be summarized and how a simple hybrid recommendation score can combine user affinity, video-topic similarity, and popularity. This exercise is intended to make recommender-system concepts concrete; it does not claim to reproduce YouTube's proprietary algorithm.
+
+The report recommends stronger user controls, transparent recommendation explanations, more intentional diversity, user-defined goals, and evaluation metrics that balance relevance with satisfaction and well-being. The central conclusion is that a successful recommender should help viewers achieve their goals—not merely maximize the number of videos they consume.
+
+#  Introduction
+
+Online video platforms contain far more content than an individual can reasonably browse. Recommendation systems help address this information-overload problem by selecting and ordering content that may be useful or interesting to each viewer. On YouTube, recommendations are visible on the Home page, on the watch page through “Up next,” and in other personalized surfaces (YouTube Help, 2026).
+
+This report selects YouTube because it is a familiar, large-scale recommender system with publicly available technical research and user-facing explanations. The analysis addresses four questions:
+
+1. Who are the users and stakeholders, and what goals should the system serve?
+2. How does Scenario Design differ when viewed from the viewer's and YouTube's organizational perspectives?
+3. What can be reverse-engineered from public documentation, research, and the product interface?
+4. What changes could improve recommendation quality, transparency, user control, and responsible outcomes?
+
+##  Scope and limitations
+
+This is a desk-based analysis of publicly available material and observable product features. It is not an audit of YouTube's internal models, source code, experiments, or private data. The R section uses simulated data solely to demonstrate analysis methods. It does not use YouTube's API, scrape user accounts, or infer actual YouTube performance.
+
+#  Platform and Recommender-System Overview
+
+YouTube's recommendation system serves different discovery situations. The Home feed is primarily personalized using a viewer's watch history, while “Up next” places particular emphasis on the video currently being watched. The Shorts feed is another personalized surface (YouTube Help, 2026).
+
+YouTube's public explanation describes signals including:
+
+- Watch history and search history.
+- Channel subscriptions.
+- Likes and dislikes.
+- “Not interested” and “Don't recommend channel” feedback.
+- Satisfaction surveys.
+- The context of the current viewing session and the video being watched.
+
+The platform also explains that recommendations compare a viewer's habits with those of people with similar viewing patterns. These descriptions support the interpretation that collaborative signals and individual behavior both contribute to personalization (YouTube, 2021; YouTube Help, 2026).
+
+##  Main stakeholders
+
+| Stakeholder | Main needs | Potential tension |
+|---|---|---|
+| Viewers | Relevant, enjoyable, useful, safe, and diverse videos | Personalization can become repetitive or narrow |
+| Creators | Reach the audiences likely to value their content | Exposure is competitive and uneven |
+| YouTube | Viewer satisfaction, retention, platform quality, and sustainable revenue | Commercial incentives may not always match an individual viewer's goals |
+| Advertisers | Relevant audiences and suitable placements | Advertising relevance must be balanced with privacy and user trust |
+| Society and regulators | Reliable information, safety, transparency, and accountability | Platform-scale ranking can amplify harmful or low-quality material |
+
+#  Scenario Design Analysis
+
+Temkin's Scenario Design framework asks three questions: **Who is the user? What is the user's goal? How can the experience be improved to help the user achieve that goal?** The emphasis is on user goals rather than simply listing features (Temkin, 2004).
+
+It is useful to apply the framework twice in this case. Viewers use YouTube to find and watch content, while YouTube operates the platform and must serve viewers, creators, and commercial stakeholders. These perspectives overlap, but their goals are not identical.
+
+##  Scenario A: Viewer perspective
+
+### Question 1: Who is the user?
+
+The primary user is an individual viewer using YouTube on a phone, computer, tablet, or television. Viewers have different levels of expertise and different motivations. Examples include:
+
+- A student searching for an explanation of a statistics concept.
+- A commuter looking for news or entertainment.
+- A person learning a practical skill such as programming or home repair.
+- A music fan discovering new artists.
+- A viewer following a creator or a particular subject.
+
+The viewer may be signed in or signed out, may have a long viewing history or be a new user, and may use YouTube for either a short visit or a longer session.
+
+### Question 2: What is the user's goal?
+
+The viewer's underlying goal is not simply to watch the next video. The goal is to find content that is relevant and valuable in the context of the current need. A viewer may want to learn something, relax, stay informed, solve a problem, or discover a new interest.
+
+A good recommendation should therefore consider more than the probability of a click. It should help the viewer avoid irrelevant results, find credible information when accuracy matters, and move easily between familiar interests and new topics.
+
+### Question 3: How can the experience be improved?
+
+The viewer experience could be improved by:
+
+1. Explaining why a video is recommended, such as “Because you watched introductory R tutorials.”
+2. Offering clear controls for topic diversity, video length, educational content, and familiar versus new topics.
+3. Making it easier to reset or temporarily pause a topic-specific recommendation profile.
+4. Reducing repeated recommendations after a viewer has already watched or rejected similar content.
+5. Giving viewers a simple way to distinguish recommendations based on personal history from popular or promoted content.
+
+**Viewer scenario summary:** A viewer opens YouTube to learn a new R programming concept. The system should recommend a relevant tutorial at an appropriate skill level, offer a few alternative explanations, and avoid repeatedly showing the same tutorial or unrelated popular videos. The viewer should be able to indicate whether the recommendation was useful.
+
+##  Scenario B: Organization perspective
+
+### Question 1: Who is the user?
+
+The organization is YouTube, operated by Google. In this scenario, the “user” of the system is the organization and its product teams, while the people affected by its decisions include viewers, creators, and advertisers. Product managers, machine-learning engineers, trust-and-safety teams, and policy teams all have different responsibilities.
+
+### Question 2: What is the organization's goal?
+
+YouTube needs to help viewers discover content they value, maintain a reliable and safe service, support creators, and sustain the platform economically. Recommendations can contribute to viewer satisfaction and continued use, but optimizing only for watch time would be too narrow. A long session does not necessarily mean the viewer achieved their goal.
+
+The organization must balance:
+- Relevance and viewer satisfaction.
+- Discovery and content diversity.
+- Creator reach and audience fit.
+- Safety, information quality, and policy enforcement.
+- Privacy, user control, and commercial sustainability.
+
+### Question 3: How can the experience be improved?
+
+YouTube could improve its recommendation capability by:
+
+1. Evaluating long-term satisfaction and successful task completion, not only clicks or viewing duration.
+2. Auditing recommendation outcomes for repetitive exposure, low-quality information, and uneven creator visibility.
+3. Providing interpretable explanations and effective user controls.
+4. Testing diversity interventions while monitoring whether they reduce relevance.
+5. Making the trade-offs among personalization, safety, privacy, and monetization more transparent.
+
+**Organization scenario summary:** YouTube wants to help a viewer discover a useful educational video while maintaining trust and a healthy platform ecosystem. The system should select relevant candidates, rank them responsibly, and learn from meaningful feedback without treating longer viewing time as the only definition of success.
+
+##  Comparison of the two scenarios
+
+| Dimension | Viewer | YouTube organization |
+|---|---|---|
+| Primary objective | Find valuable videos efficiently | Deliver a useful, safe, sustainable discovery experience |
+| Success measure | Relevance, usefulness, satisfaction, control | Satisfaction, trust, retention, safety, creator ecosystem |
+| Main concern | Repetition, irrelevant content, loss of control | Scale, competing objectives, policy, quality, sustainability |
+| Desired improvement | More control and better discovery | Better multi-objective ranking and responsible evaluation |
+
+The two perspectives are connected: if viewers consistently receive useful recommendations, they are more likely to trust the platform. However, the organization must not assume that every additional minute watched represents a positive user outcome.
+
+#  Reverse Engineering the Recommendation System
+
+Reverse engineering here means making evidence-based inferences from public research, YouTube's explanations, and the interface. It does not mean accessing private code or claiming knowledge of confidential model details.
+
+##  Evidence from the interface
+
+The main product surfaces provide clues about different recommendation contexts:
+
+| Interface surface | What can be observed | Reasonable inference |
+|---|---|---|
+| Home feed | A personalized mixture of video recommendations and other shelves | A broad profile of viewer interests is likely used |
+| Up next | Videos displayed beside or after the current video | The current video and session context are important |
+| Shorts feed | A continuous personalized stream | Rapid feedback and sequential viewing context likely matter |
+| “Not interested” | A viewer can reject a recommendation | Negative feedback can help adjust future recommendations |
+| “Don't recommend channel” | A viewer can reject a channel | Channel-level negative preference is supported |
+
+YouTube's current help documentation describes these surfaces and feedback controls (YouTube Help, 2026). A practical interface review should record the date, device type, sign-in status, and whether watch history is enabled, because recommendations can differ across these conditions.
+
+##  Candidate generation
+
+For example, a viewer who watches several beginner Python videos may receive candidate videos about Python exercises, data analysis, or related programming topics. The system can also use patterns among viewers with similar behavior to identify content the individual has not watched before.
+
+This is consistent with collaborative recommendation: relationships among users' interactions with items can reveal useful associations. It is not proof that every current recommendation is produced by one specific collaborative-filtering algorithm.
+
+##  Ranking
+
+After candidate generation, a ranking stage orders the videos. A conceptual ranking model might consider:
+
+- Predicted likelihood that the viewer will choose the video.
+- Expected viewing engagement.
+- Predicted satisfaction.
+- Viewer feedback and content quality or responsibility constraints.
+- Context, such as the current video or recommendation surface.
+
+YouTube's public explanation explicitly says that its system considers clicks, watch time, satisfaction surveys, likes, dislikes, and other feedback. It also explains that the importance of signals varies by viewer and context (YouTube, 2021).
+
+A conceptual score can be written as:
+
+\[
+Score(u,v,c) =
+f(\text{viewer }u,\text{video }v,\text{context }c)
+\]
+
+This notation is deliberately general. It does not claim to reveal YouTube's actual formula or feature weights.
+
+##  Feedback loop
+
+Recommendations influence what a viewer watches, and those viewing actions can influence later recommendations. This creates a feedback loop:
+
+```{mermaid}
+flowchart LR
+    A["Recommendation"] --> B["Viewer chooses or skips"]
+    B --> C["Watch and feedback signals"]
+    C --> D["Updated interest estimates"]
+    D --> E["Future candidate and ranking decisions"]
+    E --> A
+```
+
+The feedback loop supports adaptation as interests change. However, it can also reinforce narrow patterns if the system repeatedly interprets past behavior as the only content the viewer wants. A viewer who watches one video about a topic out of curiosity may not want that topic to dominate future recommendations.
+
+##  What is known and what remains uncertain?
+
+| Topic | Publicly supported understanding | What cannot be confirmed from public information alone |
+|---|---|---|
+| Signals | Watch/search history, subscriptions, likes/dislikes, explicit feedback, surveys | Exact feature weights and all model inputs |
+| Architecture | A published two-stage candidate-generation and ranking design | Whether every detail of the 2016 design remains unchanged |
+| Personalization | Different viewers can receive different recommendations | Exact profile representation and update schedule |
+| Context | Home and Up next use different contextual signals | Full current surface-specific model design |
+| Safety | YouTube describes systems to reduce recommendations of certain harmful or borderline content | Complete policy implementation and all model thresholds |
+| Experiments | Large-scale systems commonly require evaluation and iteration | Current experiment assignments and private test results |
+
+This distinction is essential. The analysis should not present speculation as fact.
+
+#  R-Based Demonstration: A Small Hybrid Recommender
+
+##  Purpose and dataset
+
+To demonstrate recommendation logic, this section creates a small synthetic dataset of viewers, videos, topics, and viewing events. The dataset is generated inside the notebook, so the analysis is reproducible without downloading private or licensed user data.
+
+**Important limitation:** These records are artificial. They are not collected from YouTube, do not represent YouTube's actual users, and cannot be used to measure the platform's real recommendation accuracy.
+
+The demonstration has three goals:
+
+1. Summarize viewing behavior by topic.
+2. Estimate a simple viewer-topic preference profile.
+3. Rank unseen videos using a hybrid score that combines topic affinity and video popularity.
+
+##  Create synthetic viewing data
+
+```{r}
+set.seed(607)
+
+users <- paste0("U", 1:30)
+
+video_catalog <- data.frame(
+  video_id = paste0("V", 1:20),
+  topic = rep(c("R Programming", "Python", "Statistics",
+                "Data Visualization", "Career Skills"), each = 4),
+  popularity = c(90, 75, 60, 45, 95, 80, 65, 40,
+                 85, 70, 55, 35, 88, 72, 58, 38,
+                 78, 62, 48, 30),
+  duration_min = c(8, 12, 18, 25, 10, 15, 22, 30,
+                   9, 14, 20, 28, 7, 13, 19, 26,
+                   11, 16, 23, 32)
+)
+
+topic_preferences <- data.frame(
+  user_id = users,
+  preferred_topic = sample(
+    c("R Programming", "Python", "Statistics",
+      "Data Visualization", "Career Skills"),
+    length(users), replace = TRUE
+  )
+)
+
+events <- do.call(rbind, lapply(users, function(u) {
+  pref <- topic_preferences$preferred_topic[
+    topic_preferences$user_id == u
+  ]
+  chosen <- sample(
+    video_catalog$video_id,
+    size = sample(5:10, 1),
+    replace = FALSE,
+    prob = ifelse(video_catalog$topic == pref, 3, 1)
+  )
+  data.frame(
+    user_id = u,
+    video_id = chosen,
+    watch_fraction = runif(length(chosen), 0.25, 1),
+    liked = rbinom(length(chosen), 1, 0.55)
+  )
+}))
+
+head(events)
+```
+
+##  Explore viewing activity
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+topic_activity <- events |>
+  left_join(video_catalog, by = "video_id") |>
+  group_by(topic) |>
+  summarise(
+    views = n(),
+    mean_watch_fraction = mean(watch_fraction),
+    like_rate = mean(liked),
+    .groups = "drop"
+  ) |>
+  arrange(desc(views))
+
+topic_activity
+```
+
+```{r}
+ggplot(topic_activity,
+       aes(x = reorder(topic, views), y = views)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Synthetic viewing events by topic",
+    x = "Video topic",
+    y = "Number of viewing events",
+    caption = "Illustrative synthetic data; not YouTube activity"
+  ) +
+  theme_minimal()
+```
+
+This chart describes the simulated sample only. It illustrates how a platform analyst might begin by examining which topics attract viewing activity, but raw viewing counts alone do not establish satisfaction or educational value.
+
+##  Estimate user-topic affinity
+
+For this demonstration, a simple affinity score is calculated from average watch fraction and likes. The score is not a learned neural-network output. It is a transparent baseline that can be inspected and modified.
+
+```{r}
+user_topic <- events |>
+  left_join(video_catalog, by = "video_id") |>
+  group_by(user_id, topic) |>
+  summarise(
+    mean_watch = mean(watch_fraction),
+    like_rate = mean(liked),
+    interactions = n(),
+    affinity = 0.6 * mean_watch + 0.4 * like_rate,
+    .groups = "drop"
+  )
+
+head(user_topic)
+```
+
+##  Build a simple hybrid recommendation score
+
+A hybrid recommender combines more than one source of information. Here, the score combines:
+
+- **Personal affinity:** the viewer's estimated interest in the video's topic.
+- **Popularity:** a normalized measure representing general video popularity.
+
+The illustrative weighting gives 80% to personal affinity and 20% to popularity. These weights are chosen for demonstration and are not YouTube's weights.
+
+```{r}
+recommend_for_user <- function(selected_user,
+                               personal_weight = 0.80) {
+
+  user_history <- events |>
+    filter(user_id == selected_user)
+
+  watched_ids <- user_history$video_id
+
+  affinity_profile <- user_topic |>
+    filter(user_id == selected_user) |>
+    select(topic, affinity)
+
+  video_catalog |>
+    left_join(affinity_profile, by = "topic") |>
+    mutate(
+      affinity = ifelse(is.na(affinity), 0, affinity),
+      popularity_norm = popularity / max(video_catalog$popularity),
+      hybrid_score =
+        personal_weight * affinity +
+        (1 - personal_weight) * popularity_norm,
+      already_watched = video_id %in% watched_ids
+    ) |>
+    filter(!already_watched) |>
+    arrange(desc(hybrid_score)) |>
+    select(video_id, topic, popularity, affinity,
+           hybrid_score, duration_min)
+}
+
+recommend_for_user("U1")
+```
+
+##  Compare recommendations for two viewers
+
+```{r}
+rec_u1 <- recommend_for_user("U1") |>
+  mutate(user_id = "U1")
+
+rec_u2 <- recommend_for_user("U2") |>
+  mutate(user_id = "U2")
+
+comparison <- bind_rows(rec_u1, rec_u2) |>
+  group_by(user_id) |>
+  slice_max(order_by = hybrid_score, n = 5) |>
+  ungroup()
+
+comparison
+```
+
+```{r}
+ggplot(comparison,
+       aes(x = reorder(video_id, hybrid_score),
+           y = hybrid_score,
+           fill = user_id)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  facet_wrap(~ user_id, scales = "free_y") +
+  labs(
+    title = "Illustrative top recommendations for two viewers",
+    x = "Recommended video",
+    y = "Hybrid recommendation score",
+    caption = "Synthetic demonstration; scores are not YouTube scores"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+The two viewers may receive different rankings because their simulated viewing histories differ. This illustrates the basic purpose of personalization. It also shows why popularity alone is insufficient: a globally popular video may not be the most relevant video for a particular viewer.
+
+##  Evaluate the demonstration carefully
+
+The notebook does not have a held-out ground-truth set of future user choices. Therefore, it does not report precision, recall, NDCG, or recommendation accuracy. Such metrics require a defined evaluation dataset and a defensible train/test design.
+
+For a real evaluation, a platform team could compare candidate systems using:
+- Precision@K and Recall@K for relevant-item retrieval.
+- NDCG@K for ranking quality with graded relevance.
+- Coverage and intra-list diversity for breadth of recommendations.
+- Survey-based satisfaction and task-completion measures.
+- Safety and quality indicators, including carefully defined error rates.
+- Segment-level analysis to identify differences across user groups.
+
+A/B tests can estimate the effect of a new ranking strategy, but they should include guardrail metrics. For example, an increase in session duration should not be considered a success if satisfaction, trust, or safety measures deteriorate.
+
+#  Strengths and Limitations
+
+##  Strengths
+
+**Personalized discovery.** Recommendations can help viewers find content beyond what they already know or can search for directly.
+
+**Context-sensitive suggestions.** Home recommendations and Up next recommendations serve different viewing situations. The current video can be especially useful context for suggesting what to watch next.
+
+**Multiple feedback signals.** Public explanations indicate that YouTube considers more than clicks, including watch behavior, likes/dislikes, explicit feedback, and satisfaction surveys.
+
+**Scale-oriented architecture.** The two-stage approach described by Covington et al. (2016) addresses the computational challenge of selecting from a very large catalogue.
+
+##  Limitations and risks
+
+**Over-personalization.** Strong reliance on historical behavior may make it harder for viewers to discover unfamiliar topics.
+
+**Popularity bias.** Popular videos may receive more exposure, potentially making it harder for less-established creators to reach relevant audiences.
+
+**Ambiguous behavioral signals.** A click or long watch session does not always mean that a viewer was satisfied. A person may watch a video because it is confusing, sensational, or difficult to stop.
+
+**Cold-start challenges.** A new viewer has little history from which to infer preferences. A newly uploaded video also has limited interaction data.
+
+**Feedback-loop effects.** Recommendations shape future viewing behavior, which then becomes input to later recommendations.
+
+**Limited visibility into ranking decisions.** Viewers can provide feedback and manage history, but they cannot see the complete logic behind an individual ranking.
+
+#  Recommendations for Future Improvement
+
+The following recommendations are proposals from this analysis, not claims about features YouTube has promised to implement.
+
+## Recommendation 1: Add a recommendation explanation
+
+Provide a short, understandable explanation beside each recommendation, such as “Recommended because you watched videos about R data visualization” or “Popular with viewers of this channel.” Explanations should identify the principal reason without exposing sensitive information or overwhelming the viewer.
+
+**Expected benefit:** Greater transparency and a better ability to correct unwanted recommendations.
+
+## Recommendation 2: Give viewers a diversity control
+
+Offer a simple setting that lets viewers choose between “More familiar topics,” “Balanced discovery,” and “Explore new topics.” The setting should influence the diversity of the recommendation list while preserving relevance and safety constraints.
+
+**Expected benefit:** More discovery and less repetitive exposure.
+
+## Recommendation 3: Support temporary interests
+
+Allow viewers to mark an interest as temporary—for example, researching a vacation, studying for an exam, or troubleshooting a household issue. The system could use that interest for a limited period without permanently changing the viewer's long-term profile.
+
+**Expected benefit:** Better handling of short-term needs and fewer unwanted long-term recommendations.
+
+## Recommendation 4: Evaluate usefulness, not only engagement
+
+Expand evaluation dashboards to include viewer-reported usefulness, successful learning or task completion where appropriate, repeat dissatisfaction, and the quality of information in sensitive categories. Viewing duration should be interpreted alongside these measures rather than treated as a complete measure of value.
+
+**Expected benefit:** Better alignment between ranking outcomes and actual viewer goals.
+
+## Recommendation 5: Audit diversity and creator exposure
+
+Monitor whether recommendation lists become concentrated among a small number of channels or topics. Evaluate exposure across channel size and content category, while avoiding simplistic quotas that could reduce relevance or quality.
+
+**Expected benefit:** A healthier discovery ecosystem and more opportunities for viewers to find valuable content from different creators.
+
+##  Prioritization
+
+| Recommendation | Viewer benefit | Implementation complexity | Suggested priority |
+|---|---|---|---|
+| Recommendation explanations | High | Medium | 1 |
+| Diversity control | High | Medium | 2 |
+| Temporary interests | High | Medium | 3 |
+| Usefulness-based evaluation | High | High | 4 |
+| Creator exposure audits | Medium–High | High | 5 |
+
+The priorities are qualitative judgments for this report, not measured implementation estimates.
+
+#  Conclusion
+
+YouTube's recommendation system is a useful case study because it combines large-scale retrieval, personalization, behavioral signals, ranking, and user feedback. Scenario Design shows why the system should be evaluated from both the viewer's and the organization's perspectives. Viewers want useful and relevant discovery, while YouTube must also support creators, maintain safety and trust, and sustain the platform.
+
+Public documentation describes important recommendation signals, and Covington et al. (2016) provide a technical account of a two-stage deep-learning architecture based on candidate generation and ranking. However, neither public descriptions nor this report reveal the complete current production algorithm. The R demonstration therefore uses synthetic data to illustrate basic personalization and hybrid ranking rather than claiming to reproduce YouTube.
+
+The most important recommendation is to define success around viewer value. A recommendation system should help people find what they need, learn, explore, and enjoy content while preserving meaningful control. Relevance, diversity, transparency, satisfaction, and safety should be evaluated together. A system that helps viewers achieve their goals is more valuable than one that simply encourages them to keep watching.
+
+#  References
+
+Covington, P., Adams, J., & Sargin, E. (2016). Deep neural networks for YouTube recommendations. *Proceedings of the 10th ACM Conference on Recommender Systems*, 191–198. https://doi.org/10.1145/2959100.2959190
+
+Temkin, B. D. (2004). *Scenario design: A disciplined approach to customer experience*. Forrester Research. (Framework as described in the DATA 607 assignment materials.)
+
+YouTube. (2021, September 15). *On YouTube's recommendation system*. YouTube Official Blog. https://blog.youtube/inside-youtube/on-youtubes-recommendation-system/
+
+YouTube Help. (2026). *How YouTube recommendations work*. Google. https://support.google.com/youtube/answer/16089387
+
+YouTube Help. (2026). *Manage your recommendations & search results*. Google. https://support.google.com/youtube/answer/6342839
+
+YouTube. (n.d.). *How YouTube recommends videos* [PDF]. Google. https://services.google.com/fh/files/misc/how-youtube-recommends-videos.pdf
+
+
